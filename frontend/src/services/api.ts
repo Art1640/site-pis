@@ -6,28 +6,20 @@ const STORAGE_KEY = 'pissenlits-fundraising-data'
 const INITIAL_DATA: FundraisingRecord[] = [
   {
     "Date": "2025-09-01",
-    "Nom": "Jean Dupont",
-    "Activité": "Vente de gâteaux",
-    "Détails": "Vente lors du marché local",
-    "Montant": 85.50,
-    "Qui": "Marie Martin"
+    "Qui": "Groupe",
+    "Type": "Début d'année",
+    "Activité": "Début d'année",
+    "Détails": "",
+    "Montant": 330,
   },
   {
-    "Date": "2025-09-03",
-    "Nom": "Sophie Moreau",
-    "Activité": "Lavage de voitures",
-    "Détails": "Lavage dans le parking du supermarché",
-    "Montant": 120.00,
-    "Qui": "Pierre Dubois"
+    "Date": "2025-09-18",
+    "Qui": "Groupe",
+    "Type": "Bar Pi",
+    "Activité": "Bar Pi #1",
+    "Détails": "Tout le monde présent, grosse caisse, sympa :)",
+    "Montant": -35
   },
-  {
-    "Date": "2025-09-05",
-    "Nom": "Lucas Bernard",
-    "Activité": "Vente de calendriers",
-    "Détails": "Vente porte-à-porte dans le quartier",
-    "Montant": 45.75,
-    "Qui": "Anne Leroy"
-  }
 ]
 
 // Helper functions for localStorage
@@ -64,7 +56,7 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
   // Group by person for leaderboard
   const person_totals: { [key: string]: number } = {}
   records.forEach(record => {
-    person_totals[record.Nom] = (person_totals[record.Nom] || 0) + record.Montant
+    person_totals[record.Qui] = (person_totals[record.Qui] || 0) + record.Montant
   })
 
   // Group by activity
@@ -75,18 +67,36 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
     activity_counts[record.Activité] = (activity_counts[record.Activité] || 0) + 1
   })
 
-  // Create cumulative data
+  // Create cumulative data for all dates from Sept 1, 2025 to June 30, 2026
+  const startDate = new Date('2025-09-01')
+  const endDate = new Date('2026-06-30')
+  const currentDate = new Date()
   const sortedRecords = [...records].sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())
   const cumulative_data: { date: string; total: number }[] = []
-  let runningTotal = 0
 
-  sortedRecords.forEach(record => {
-    runningTotal += record.Montant
+  let runningTotal = 0
+  const currentDateObj = new Date(startDate)
+
+  while (currentDateObj <= endDate && currentDateObj <= currentDate) {
+    const dateKey = currentDateObj.toISOString().split('T')[0]
+
+    // Check if there are any transactions on this date
+    const dayRecords = sortedRecords.filter(record => record.Date === dateKey)
+
+    // Add all transactions for this day
+    dayRecords.forEach(record => {
+      runningTotal += record.Montant
+    })
+
+    // Add data point for this date
     cumulative_data.push({
-      date: record.Date,
+      date: dateKey,
       total: runningTotal
     })
-  })
+
+    // Move to next day
+    currentDateObj.setDate(currentDateObj.getDate() + 1)
+  }
 
   return {
     total_funds,
@@ -139,7 +149,7 @@ export const apiService = {
       const records = loadFromStorage()
       const index = records.findIndex(r =>
         r.Date === updatedRecord.Date &&
-        r.Nom === updatedRecord.Nom &&
+        r.Qui === updatedRecord.Qui &&
         r.Activité === updatedRecord.Activité
       )
       if (index !== -1) {
@@ -158,7 +168,7 @@ export const apiService = {
       const records = loadFromStorage()
       const filteredRecords = records.filter(r =>
         !(r.Date === record.Date &&
-          r.Nom === record.Nom &&
+          r.Qui === record.Qui &&
           r.Activité === record.Activité)
       )
       saveToStorage(filteredRecords)

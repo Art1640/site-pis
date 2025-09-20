@@ -7,9 +7,10 @@ const Navbar: React.FC = () => {
 
   const navItems = [
     { path: '/', label: 'Accueil' },
-    { path: '/classement', label: 'Classement' },
-    { path: '/activites', label: 'Activités' },
-    { path: '/collectes', label: 'Toutes les collectes' }
+    // { path: '/classement', label: 'Classement' },
+    // { path: '/activites', label: 'Activités' },
+    { path: '/collectes', label: 'Détails' },
+    { path: '/photos', label: 'Ne pas clicker' }
   ]
 
   const toggleMobileMenu = () => {
@@ -26,7 +27,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center py-4">
           <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
             <div className="text-white text-xl font-bold">
-              🌼 Pissenlits 2025-2026
+              🌼 Pissenlits 2025-2026 🌼
             </div>
           </Link>
 

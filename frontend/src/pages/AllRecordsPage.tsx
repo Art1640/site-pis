@@ -30,7 +30,7 @@ const AllRecordsPage: React.FC = () => {
 
     let filtered = records.filter(record => {
       const matchesActivity = !filterActivity || record.Activité === filterActivity
-      const matchesPerson = !filterPerson || record.Nom === filterPerson
+      const matchesPerson = !filterPerson || record.Qui === filterPerson
       const matchesSearch = !searchTerm ||
         Object.values(record).some(value =>
           value.toString().toLowerCase().includes(searchTerm.toLowerCase())
@@ -71,9 +71,6 @@ const AllRecordsPage: React.FC = () => {
     return <ErrorMessage message="Aucune donnée disponible" />
   }
 
-  const uniqueActivities = [...new Set(records.map(r => r.Activité))].sort()
-  const uniquePersons = [...new Set(records.map(r => r.Nom))].sort()
-
   const getSortIcon = (field: SortField) => {
     if (field !== sortField) {
       return (
@@ -98,79 +95,11 @@ const AllRecordsPage: React.FC = () => {
     <div className="max-w-7xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-scouts-blue mb-4">
-          Liste des collectes
+          Liste des actis
         </h1>
-        <h2 className="text-xl text-gray-600 mb-6">
-          Consultez toutes les contributions des Pissenlits
-        </h2>
       </div>
 
       <div className="bg-white rounded-lg shadow-lg p-6">
-        {/* Filters */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Recherche
-            </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Rechercher..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-scouts-blue focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Activité
-            </label>
-            <select
-              value={filterActivity}
-              onChange={(e) => setFilterActivity(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-scouts-blue focus:border-transparent"
-            >
-              <option value="">Toutes les activités</option>
-              {uniqueActivities.map(activity => (
-                <option key={activity} value={activity}>{activity}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Contributeur
-            </label>
-            <select
-              value={filterPerson}
-              onChange={(e) => setFilterPerson(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-scouts-blue focus:border-transparent"
-            >
-              <option value="">Tous les contributeurs</option>
-              {uniquePersons.map(person => (
-                <option key={person} value={person}>{person}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-end">
-            <button
-              onClick={() => {
-                setFilterActivity('')
-                setFilterPerson('')
-                setSearchTerm('')
-              }}
-              className="w-full px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
-            >
-              Réinitialiser
-            </button>
-          </div>
-        </div>
-
-        {/* Results count */}
-        <div className="mb-4 text-sm text-gray-600">
-          {filteredAndSortedRecords.length} collecte(s) trouvée(s) sur {records.length} au total
-        </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
@@ -179,11 +108,11 @@ const AllRecordsPage: React.FC = () => {
               <tr className="bg-scouts-blue text-white">
                 {[
                   { key: 'Date' as SortField, label: 'Date' },
-                  { key: 'Nom' as SortField, label: 'Nom' },
+                  { key: 'Qui' as SortField, label: 'Qui' },
+                  { key: 'Type' as SortField, label: 'Type' },
                   { key: 'Activité' as SortField, label: 'Activité' },
                   { key: 'Détails' as SortField, label: 'Détails' },
                   { key: 'Montant' as SortField, label: 'Montant' },
-                  { key: 'Qui' as SortField, label: 'Responsable' },
                 ].map(({ key, label }) => (
                   <th
                     key={key}
@@ -205,7 +134,10 @@ const AllRecordsPage: React.FC = () => {
                     {formatDate(record.Date)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {record.Nom}
+                    {record.Qui}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {record.Type}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {record.Activité}
@@ -215,9 +147,6 @@ const AllRecordsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-scouts-blue">
                     {formatCurrency(record.Montant)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {record.Qui}
                   </td>
                 </tr>
               ))}

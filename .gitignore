@@ -43,6 +43,8 @@ logs/
 *.swp
 *.swo
 *.tmp
+.vite-cache/
+frontend/.vite-cache/
 
 # Coverage reports
 coverage/

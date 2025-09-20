@@ -54,13 +54,13 @@ const LeaderboardPage: React.FC = () => {
           '#FFD700', // Gold for 1st
           '#C0C0C0', // Silver for 2nd
           '#CD7F32', // Bronze for 3rd
-          ...Array(sortedContributors.length - 3).fill('#1E3A8A') // Blue for others
+          ...Array(Math.max(0, sortedContributors.length - 3)).fill('#1E3A8A') // Blue for others
         ],
         borderColor: [
           '#FFB000',
           '#A0A0A0',
           '#B8691A',
-          ...Array(sortedContributors.length - 3).fill('#1E40AF') // Darker blue for others
+          ...Array(Math.max(0, sortedContributors.length - 3)).fill('#1E40AF') // Darker blue for others
         ],
         borderWidth: 2,
       },

@@ -9,11 +9,11 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [formData, setFormData] = useState({
     Date: new Date().toISOString().split('T')[0],
-    Nom: '',
+    Qui: '',
+    Type: '',
     Activité: '',
     Détails: '',
-    Montant: '',
-    Qui: ''
+    Montant: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -30,11 +30,11 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       // Reset form
       setFormData({
         Date: new Date().toISOString().split('T')[0],
-        Nom: '',
+        Qui: '',
+        Type: '',
         Activité: '',
         Détails: '',
-        Montant: '',
-        Qui: ''
+        Montant: ''
       })
       
       setIsOpen(false)
@@ -148,12 +148,24 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nom du contributeur</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Qui (personne/groupe)</label>
               <input
                 type="text"
-                value={formData.Nom}
-                onChange={(e) => setFormData({ ...formData, Nom: e.target.value })}
+                value={formData.Qui}
+                onChange={(e) => setFormData({ ...formData, Qui: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-scouts-blue focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <input
+                type="text"
+                value={formData.Type}
+                onChange={(e) => setFormData({ ...formData, Type: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-scouts-blue focus:border-transparent"
+                placeholder="Ex: Bar Pi, Début d'année, etc."
                 required
               />
             </div>
@@ -167,13 +179,15 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
                 required
               >
                 <option value="">Sélectionner une activité</option>
+                <option value="Début d'année">Début d'année</option>
+                <option value="Bar Pi #1">Bar Pi #1</option>
+                <option value="Bar Pi #2">Bar Pi #2</option>
+                <option value="Bar Pi #3">Bar Pi #3</option>
                 <option value="Vente de gâteaux">Vente de gâteaux</option>
-                <option value="Lavage de voitures">Lavage de voitures</option>
-                <option value="Vente de calendriers">Vente de calendriers</option>
                 <option value="Tombola">Tombola</option>
                 <option value="Collecte de dons">Collecte de dons</option>
                 <option value="Brocante">Brocante</option>
-                <option value="Vente de chocolats">Vente de chocolats</option>
+                <option value="Autre">Autre</option>
               </select>
             </div>
 
@@ -193,24 +207,17 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
               <input
                 type="number"
                 step="0.01"
-                min="0"
                 value={formData.Montant}
                 onChange={(e) => setFormData({ ...formData, Montant: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-scouts-blue focus:border-transparent"
+                placeholder="Ex: 50.00 ou -25.50 pour une dépense"
+                pattern="-?[0-9]+(\.[0-9]+)?"
+                title="Entrez un montant positif ou négatif (ex: 50.00 ou -25.50)"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Responsable de l'enregistrement</label>
-              <input
-                type="text"
-                value={formData.Qui}
-                onChange={(e) => setFormData({ ...formData, Qui: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-scouts-blue focus:border-transparent"
-                required
-              />
-            </div>
+
 
             <div className="flex space-x-3 pt-4">
               <button

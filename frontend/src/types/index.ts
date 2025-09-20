@@ -1,10 +1,10 @@
 export interface FundraisingRecord {
   Date: string
-  Nom: string
+  Qui: string
+  Type: string
   Activité: string
   Détails: string
   Montant: number
-  Qui: string
 }
 
 export interface SummaryData {

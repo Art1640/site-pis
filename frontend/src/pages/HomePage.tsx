@@ -11,6 +11,7 @@ import {
   Legend,
   Filler,
 } from 'chart.js'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { useSummary, useRecords } from '../hooks/useData'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -24,7 +25,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  ChartDataLabels
 )
 
 const HomePage: React.FC = () => {
@@ -56,40 +58,30 @@ const HomePage: React.FC = () => {
     if (!records) return []
 
     const currentDate = new Date()
-    const endDate = new Date('2026-06-30')
-    const dataMap = new Map()
-
-    // Initialize all dates with 0
-    dateRange.forEach(date => {
-      dataMap.set(date.toISOString().split('T')[0], 0)
-    })
-
-    // Fill in actual data up to current date
-    let runningTotal = 0
     const sortedRecords = [...records].sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())
+    let runningTotal = 0
 
-    sortedRecords.forEach(record => {
-      const recordDate = new Date(record.Date)
-      if (recordDate <= currentDate) {
-        runningTotal += record.Montant
-        const dateKey = record.Date
-        dataMap.set(dateKey, runningTotal)
+    // Process each date in chronological order
+    const result = dateRange.map(date => {
+      const dateKey = date.toISOString().split('T')[0]
+      const dateObj = new Date(dateKey)
 
-        // Fill forward for subsequent dates up to current date
-        const nextDay = new Date(recordDate)
-        nextDay.setDate(nextDay.getDate() + 1)
+      if (dateObj <= currentDate) {
+        // Check if there are any transactions on this specific date
+        const dayRecords = sortedRecords.filter(record => record.Date === dateKey)
 
-        while (nextDay <= currentDate && nextDay <= endDate) {
-          const nextDateKey = nextDay.toISOString().split('T')[0]
-          if (dataMap.get(nextDateKey) < runningTotal) {
-            dataMap.set(nextDateKey, runningTotal)
-          }
-          nextDay.setDate(nextDay.getDate() + 1)
-        }
+        // Add all transactions for this day
+        dayRecords.forEach(record => {
+          runningTotal += record.Montant
+        })
+
+        return { date: dateKey, total: runningTotal }
       }
-    })
 
-    return Array.from(dataMap.entries()).map(([date, total]) => ({ date, total }))
+      return null
+    }).filter(item => item !== null)
+
+    return result
   }, [records, dateRange])
 
   // Create per-person cumulative data
@@ -97,9 +89,8 @@ const HomePage: React.FC = () => {
     if (!records) return { personTotals: new Map(), uniquePersons: [] }
 
     const currentDate = new Date()
-    const endDate = new Date('2026-06-30')
     const personTotals = new Map()
-    const uniquePersons = [...new Set(records.map(r => r.Nom))]
+    const uniquePersons = [...new Set(records.map(r => r.Qui))]
 
     // Initialize person totals for each date
     uniquePersons.forEach(person => {
@@ -114,27 +105,27 @@ const HomePage: React.FC = () => {
     const sortedRecords = [...records].sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())
 
     uniquePersons.forEach(person => {
-      let runningTotal = 0
       const personData = personTotals.get(person)
+      let runningTotal = 0
 
-      sortedRecords.forEach(record => {
-        const recordDate = new Date(record.Date)
-        if (record.Nom === person && recordDate <= currentDate) {
-          runningTotal += record.Montant
-          const dateKey = record.Date
+      // Process each date in chronological order
+      dateRange.forEach(date => {
+        const dateKey = date.toISOString().split('T')[0]
+        const dateObj = new Date(dateKey)
+
+        if (dateObj <= currentDate) {
+          // Check if there's a transaction on this specific date
+          const dayRecords = sortedRecords.filter(record =>
+            record.Qui === person && record.Date === dateKey
+          )
+
+          // Add all transactions for this day
+          dayRecords.forEach(record => {
+            runningTotal += record.Montant
+          })
+
+          // Set the cumulative total for this date
           personData.set(dateKey, runningTotal)
-
-          // Fill forward for subsequent dates up to current date
-          const nextDay = new Date(recordDate)
-          nextDay.setDate(nextDay.getDate() + 1)
-
-          while (nextDay <= currentDate && nextDay <= endDate) {
-            const nextDateKey = nextDay.toISOString().split('T')[0]
-            if (personData.get(nextDateKey) < runningTotal) {
-              personData.set(nextDateKey, runningTotal)
-            }
-            nextDay.setDate(nextDay.getDate() + 1)
-          }
         }
       })
     })
@@ -142,11 +133,23 @@ const HomePage: React.FC = () => {
     return { personTotals, uniquePersons }
   }, [records, dateRange])
 
-  // Colors for different people - blue theme variations
+  // Colors for different people - distinct colors for easy differentiation
   const personColors = useMemo(() => [
-    '#1E3A8A', '#3B82F6', '#1E40AF', '#2563EB', '#1D4ED8',
-    '#6366F1', '#4F46E5', '#7C3AED', '#8B5CF6', '#A855F7',
-    '#C084FC', '#E879F9', '#F472B6', '#FB7185', '#F87171'
+    '#1E3A8A', // Dark blue
+    '#DC2626', // Red
+    '#059669', // Green
+    '#D97706', // Orange
+    '#7C3AED', // Purple
+    '#DB2777', // Pink
+    '#0891B2', // Cyan
+    '#65A30D', // Lime
+    '#C2410C', // Orange-red
+    '#9333EA', // Violet
+    '#0D9488', // Teal
+    '#CA8A04', // Yellow
+    '#BE185D', // Rose
+    '#0369A1', // Sky blue
+    '#166534', // Dark green
   ], [])
 
   const chartData = useMemo(() => {
@@ -176,7 +179,7 @@ const HomePage: React.FC = () => {
         })) :
         [
           {
-            label: 'Fonds collectés (€)',
+            label: '',
             data: dateRange.map(date => {
               const dateKey = date.toISOString().split('T')[0]
               const dateObj = new Date(dateKey)
@@ -199,33 +202,73 @@ const HomePage: React.FC = () => {
     }
   }, [dateRange, showPerPerson, uniquePersons, personTotals, cumulativeData, personColors])
 
+
+
   const chartOptions = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: showPerPerson,
-        position: 'top' as const,
-        labels: {
-          usePointStyle: true,
-          padding: 20,
-          font: {
-            size: 12,
-          },
-        },
+        display: false, // Always hide legend, we'll show names on lines
       },
+
+      datalabels: {
+        display: function(context: any) {
+          if (!showPerPerson) return false
+
+          // Only show on the very last data point
+          const dataIndex = context.dataIndex
+          const dataset = context.dataset
+
+          // Find the last non-null data point
+          let lastValidIndex = -1
+          for (let i = dataset.data.length - 1; i >= 0; i--) {
+            if (dataset.data[i] !== null && dataset.data[i] !== undefined) {
+              lastValidIndex = i
+              break
+            }
+          }
+
+          return dataIndex === lastValidIndex
+        },
+        align: 'right' as const,
+        anchor: 'center' as const,
+        offset: 15,
+        backgroundColor: 'transparent',
+        borderWidth: 0,
+        color: function(context: any) {
+          return context.dataset.borderColor
+        },
+        font: {
+          weight: 'bold' as const,
+          size: 14
+        },
+        formatter: function(_value: any, context: any) {
+          return context.dataset.label
+        }
+      } as any,
+
       tooltip: {
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         titleColor: '#ffffff',
         bodyColor: '#ffffff',
         borderColor: '#1E3A8A',
         borderWidth: 1,
+        displayColors: false, // Remove color squares
         callbacks: {
+          title: function(context: any) {
+            // Get the actual date from the data index
+            const dataIndex = context[0].dataIndex
+            const dateKey = dateRange[dataIndex]?.toISOString().split('T')[0]
+            return dateKey ? formatDate(dateKey) : formatDate(context[0].label)
+          },
           label: function(context: any) {
             if (showPerPerson) {
-              return `${context.dataset.label} : ${formatCurrency(context.parsed.y || 0)}`
+              // In per-person mode: show "Name: Amount"
+              return `${context.dataset.label}: ${formatCurrency(context.parsed.y || 0)}`
             }
-            return `Total : ${formatCurrency(context.parsed.y || 0)}`
+            // In total mode: show only the amount
+            return formatCurrency(context.parsed.y || 0)
           }
         }
       },
@@ -306,15 +349,13 @@ const HomePage: React.FC = () => {
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-scouts-green mb-4">
-          Évolution des fonds collectés
+          Collecte de la Moulah
         </h1>
         <h2 className="text-xl text-gray-600 mb-6">
-          Projet Scouts 2025-2026
+          Pour financer nos vacances de juillet 2026
         </h2>
         <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-          Bienvenue sur le site de collecte de fonds pour notre projet Scouts !
-          Suivez notre progression ci-dessous et découvrez comment nous nous rapprochons
-          de notre objectif grâce à vos contributions.
+          (to be filled...)
         </p>
       </div>
 
@@ -322,7 +363,7 @@ const HomePage: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div className="text-center md:text-left mb-4 md:mb-0">
             <div className="text-3xl font-bold text-scouts-blue">
-              Total collecté : {formatCurrency(summary.total_funds)}
+              Richesse actuelle : {formatCurrency(summary.total_funds)}
             </div>
           </div>
 
@@ -335,7 +376,7 @@ const HomePage: React.FC = () => {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              📈 Total
+              📈 Groupe
             </button>
             <button
               onClick={() => setShowPerPerson(true)}
@@ -345,13 +386,16 @@ const HomePage: React.FC = () => {
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              👥 Par personne
+              👥 Par enfant
             </button>
           </div>
         </div>
 
         <div className="h-96">
-          <Line data={chartData} options={chartOptions} />
+          <Line
+            data={chartData}
+            options={chartOptions}
+          />
         </div>
       </div>
     </div>

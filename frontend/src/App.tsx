@@ -1,19 +1,20 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import DataManager from './components/DataManager'
+// import DataManager from './components/DataManager'
 import HomePage from './pages/HomePage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import ActivitiesPage from './pages/ActivitiesPage'
 import AllRecordsPage from './pages/AllRecordsPage'
+import PhotoGalleryPage from './pages/PhotoGalleryPage'
 
 function App() {
-  const [dataVersion, setDataVersion] = useState(0)
+  const [dataVersion] = useState(0)
 
-  const handleDataChange = useCallback(() => {
-    setDataVersion(prev => prev + 1)
-  }, [])
+  // const handleDataChange = useCallback(() => {
+  //   setDataVersion(prev => prev + 1)
+  // }, [])
 
   return (
     <Router>
@@ -25,10 +26,11 @@ function App() {
             <Route path="/classement" element={<LeaderboardPage key={dataVersion} />} />
             <Route path="/activites" element={<ActivitiesPage key={dataVersion} />} />
             <Route path="/collectes" element={<AllRecordsPage key={dataVersion} />} />
+            <Route path="/photos" element={<PhotoGalleryPage />} />
           </Routes>
         </main>
         <Footer />
-        <DataManager onDataChange={handleDataChange} />
+        {/* <DataManager onDataChange={handleDataChange} /> */}
       </div>
     </Router>
   )
