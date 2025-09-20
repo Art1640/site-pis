@@ -6,21 +6,37 @@ const PhotoGalleryPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Load photos from the configuration file
+    // Auto-detect photos in the photos folder
     const loadPhotos = async () => {
       try {
         // Use the correct base path for GitHub Pages
         const basePath = window.location.hostname === 'localhost' ? '' : '/site-pis'
-        const response = await fetch(`${basePath}/photos/photos.json`)
-        if (response.ok) {
-          const photoNames: string[] = await response.json()
-          // Convert to full paths with correct base path
-          const photoPaths = photoNames.map(name => `${basePath}/photos/${name}`)
-          setPhotos(photoPaths)
-        } else {
-          console.error('Could not load photos.json configuration file')
-          setPhotos([])
+
+        // Common image file names to try
+        const commonPhotoNames = [
+          'IMG_0044.jpg', 'IMG_0047.jpg', 'IMG_0059.JPG',
+          'photo1.jpg', 'photo2.jpg', 'photo3.jpg', 'photo4.jpg', 'photo5.jpg',
+          'image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg',
+          '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg',
+          'scouts1.jpg', 'scouts2.jpg', 'scouts3.jpg', 'groupe.jpg'
+        ]
+
+        const existingPhotos: string[] = []
+
+        // Test each potential photo
+        for (const photoName of commonPhotoNames) {
+          try {
+            const photoUrl = `${basePath}/photos/${photoName}`
+            const response = await fetch(photoUrl, { method: 'HEAD' })
+            if (response.ok) {
+              existingPhotos.push(photoUrl)
+            }
+          } catch (error) {
+            // Photo doesn't exist, skip it
+          }
         }
+
+        setPhotos(existingPhotos)
       } catch (error) {
         console.error('Error loading photos:', error)
         setPhotos([])
