@@ -12,9 +12,6 @@ const AllRecordsPage: React.FC = () => {
   const { records, loading, error } = useRecords()
   const [sortField, setSortField] = useState<SortField>('Date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-  const [filterActivity, setFilterActivity] = useState<string>('')
-  const [filterPerson, setFilterPerson] = useState<string>('')
-  const [searchTerm, setSearchTerm] = useState<string>('')
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -28,18 +25,7 @@ const AllRecordsPage: React.FC = () => {
   const filteredAndSortedRecords = useMemo(() => {
     if (!records) return []
 
-    let filtered = records.filter(record => {
-      const matchesActivity = !filterActivity || record.Activité === filterActivity
-      const matchesPerson = !filterPerson || record.Qui === filterPerson
-      const matchesSearch = !searchTerm ||
-        Object.values(record).some(value =>
-          value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        )
-
-      return matchesActivity && matchesPerson && matchesSearch
-    })
-
-    return filtered.sort((a, b) => {
+    return records.sort((a, b) => {
       let aValue = a[sortField]
       let bValue = b[sortField]
 
@@ -57,7 +43,7 @@ const AllRecordsPage: React.FC = () => {
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
       return 0
     })
-  }, [records, sortField, sortDirection, filterActivity, filterPerson, searchTerm])
+  }, [records, sortField, sortDirection])
 
   if (loading) {
     return <LoadingSpinner message="Chargement des collectes..." />
