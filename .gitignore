@@ -1,0 +1,68 @@
+# Python virtual environments
+venv/
+backend/venv/
+
+frontend/node_modules
+
+# Python compiled files
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Python package/dependency files
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.whl
+
+# Environment variables and secrets
+.env
+*.env
+*.env.*
+!.env.example
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Cache and temporary files
+*.cache
+*.swp
+*.swo
+*.tmp
+
+# Coverage reports
+coverage/
+.coverage
+*.cover
+*.coverage.*
+
+# Testing frameworks
+.pytest_cache/
+.tox/
+.nox/
+
+# Build tools
+node_modules/  # If you use Node.js in the project
+dist/
+build/
+
+# Other common ignores
+*.bak
+*.gho
+*.orig
+*.tmp
+*.backup

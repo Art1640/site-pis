@@ -1,0 +1,42 @@
+[
+  {
+    "Date": "2025-09-01",
+    "Nom": "Jean Dupont",
+    "Activité": "Vente de gâteaux",
+    "Détails": "Vente lors du marché local",
+    "Montant": 85.50,
+    "Qui": "Marie Martin"
+  },
+  {
+    "Date": "2025-09-03",
+    "Nom": "Sophie Moreau",
+    "Activité": "Lavage de voitures",
+    "Détails": "Lavage dans le parking du supermarché",
+    "Montant": 120.00,
+    "Qui": "Pierre Dubois"
+  },
+  {
+    "Date": "2025-09-05",
+    "Nom": "Lucas Bernard",
+    "Activité": "Vente de calendriers",
+    "Détails": "Vente porte-à-porte dans le quartier",
+    "Montant": 45.75,
+    "Qui": "Anne Leroy"
+  },
+  {
+    "Date": "2025-09-08",
+    "Nom": "Emma Rousseau",
+    "Activité": "Tombola",
+    "Détails": "Tombola lors de la fête de l'école",
+    "Montant": 200.25,
+    "Qui": "Marc Petit"
+  },
+  {
+    "Date": "2025-09-12",
+    "Nom": "Jean Dupont",
+    "Activité": "Vente de gâteaux",
+    "Détails": "Stand à la sortie de l'église",
+    "Montant": 67.80,
+    "Qui": "Marie Martin"
+  }
+]
