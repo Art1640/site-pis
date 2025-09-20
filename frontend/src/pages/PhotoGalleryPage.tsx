@@ -9,33 +9,22 @@ const PhotoGalleryPage: React.FC = () => {
     // Load photos from the configuration file
     const loadPhotos = async () => {
       try {
-        // Load the photos.json configuration file
-        const response = await fetch('/photos/photos.json')
+        // Use the correct base path for GitHub Pages
+        const basePath = window.location.hostname === 'localhost' ? '' : '/site-pis'
+        const response = await fetch(`${basePath}/photos/photos.json`)
         if (response.ok) {
           const photoNames: string[] = await response.json()
-          // Convert to full paths and verify they exist
-          const existingPhotos: string[] = []
-
-          for (const photoName of photoNames) {
-            try {
-              // Test if the image can be loaded
-              const imgResponse = await fetch(`/photos/${photoName}`, { method: 'HEAD' })
-              if (imgResponse.ok) {
-                existingPhotos.push(`/photos/${photoName}`)
-              }
-            } catch (error) {
-              console.warn(`Photo not found: ${photoName}`)
-            }
-          }
-
-          setPhotos(existingPhotos)
+          // Convert to full paths with correct base path
+          const photoPaths = photoNames.map(name => `${basePath}/photos/${name}`)
+          setPhotos(photoPaths)
         } else {
           console.error('Could not load photos.json configuration file')
           setPhotos([])
         }
-        setLoading(false)
       } catch (error) {
         console.error('Error loading photos:', error)
+        setPhotos([])
+      } finally {
         setLoading(false)
       }
     }
