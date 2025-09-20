@@ -2,6 +2,8 @@
 
 Un site web moderne et responsive pour suivre la collecte de fonds du projet Pissenlits 2025-2026. Le site affiche les données de collecte sous forme de graphiques interactifs et de tableaux, entièrement en français.
 
+**✨ Application frontend-only** - Aucun serveur requis ! Les données sont stockées localement dans le navigateur avec possibilité d'export/import.
+
 ## 🚀 Fonctionnalités
 
 - **Page d'accueil** :
@@ -12,92 +14,87 @@ Un site web moderne et responsive pour suivre la collecte de fonds du projet Pis
 - **Classement** : Podium des meilleurs contributeurs et graphique en barres horizontales
 - **Activités** : Graphique circulaire des fonds par type d'activité et tableau récapitulatif
 - **Toutes les collectes** : Tableau filtrable et triable de tous les enregistrements
+- **Gestion des données** : Ajout, modification et suppression de collectes
+- **Export/Import** : Sauvegarde et restauration des données en JSON
+- **Stockage local** : Données persistantes dans le navigateur (localStorage)
 - **Design responsive** : Optimisé pour desktop et mobile
 - **Thème Pissenlits** : Couleurs blanc et bleu foncé adaptées à l'identité des Pissenlits
 
 ## 🛠️ Technologies utilisées
 
-### Backend
-- **Python 3.8+** avec **Flask**
-- **Flask-CORS** pour les requêtes cross-origin
-- Stockage des données en **JSON**
-- API REST avec endpoints `/api/records` et `/api/summary`
-
-### Frontend
+### Frontend-only Application
 - **React 18** avec **TypeScript**
 - **Vite** pour le développement rapide avec HMR
 - **Tailwind CSS** pour le styling responsive
 - **Chart.js** avec **react-chartjs-2** pour les graphiques
 - **React Router** pour la navigation
-- **Axios** pour les appels API
+- **LocalStorage** pour la persistance des données
+- **GitHub Pages** pour l'hébergement gratuit
 
 ## 📋 Prérequis
 
 Avant de commencer, assurez-vous d'avoir installé :
 
-- **Python 3.8+** ([Télécharger Python](https://www.python.org/downloads/))
-- **Node.js 16+** et **npm** ([Télécharger Node.js](https://nodejs.org/))
+- **Node.js 18+** et **npm** ([Télécharger Node.js](https://nodejs.org/))
 - **Git** ([Télécharger Git](https://git-scm.com/downloads))
+- Un navigateur moderne (Chrome, Firefox, Safari, Edge)
 
 ### Vérification des prérequis
 
 ```bash
-python3 --version  # Doit afficher Python 3.8+
-node --version     # Doit afficher v16+
+node --version     # Doit afficher v18+
 npm --version      # Doit afficher 8+
 ```
 
 ## 🚀 Installation et lancement
 
-### Option 1 : Lancement automatique (Recommandé)
-
-Le script `launch.sh` configure et lance automatiquement les deux serveurs :
+### Développement local
 
 ```bash
 # Cloner le projet
 git clone <url-du-repo>
-cd scouts-fundraising
+cd site-pis
 
-# Lancer les deux serveurs
-./launch.sh
-```
-
-Le script va :
-- Créer l'environnement virtuel Python
-- Installer les dépendances backend
-- Installer les dépendances frontend
-- Vérifier la disponibilité des ports (5000 pour backend, 3000 pour frontend)
-- Lancer les deux serveurs simultanément
-
-### Option 2 : Lancement manuel
-
-#### Backend
-
-```bash
-# Naviguer vers le dossier backend
-cd backend
-
-# Créer l'environnement virtuel
-python3 -m venv venv
-
-# Activer l'environnement virtuel
-source venv/bin/activate  # Linux/Mac
-# ou
-venv\Scripts\activate     # Windows
+# Naviguer vers le dossier frontend
+cd frontend
 
 # Installer les dépendances
-pip install -r requirements.txt
+npm install
 
-# Lancer le serveur Flask
-python app.py
+# Lancer le serveur de développement
+npm run dev
 ```
 
-Le backend sera accessible sur `http://localhost:5000`
-
-#### Frontend
+**⚠️ Sur Windows avec OneDrive :** Si vous rencontrez des erreurs de permissions, utilisez :
 
 ```bash
-# Dans un nouveau terminal, naviguer vers le dossier frontend
+# Windows
+start-dev.bat
+
+# Linux/Mac
+chmod +x start-dev.sh
+./start-dev.sh
+```
+
+L'application sera accessible sur `http://localhost:3000`
+
+### Construction pour la production
+
+```bash
+# Dans le dossier frontend
+npm run build
+
+# Les fichiers optimisés seront dans le dossier dist/
+```
+
+### Déploiement automatique
+
+Le projet inclut une configuration GitHub Actions pour un déploiement automatique :
+
+```bash
+# Utiliser le script de déploiement
+chmod +x deploy.sh
+./deploy.sh
 cd frontend
 
 # Installer les dépendances
@@ -275,5 +272,36 @@ Pour toute question ou problème :
 Ce projet est développé pour les Scouts de France. Tous droits réservés.
 
 ---
+
+## 🔧 Dépannage
+
+### Problème de permissions sur Windows (OneDrive)
+
+Si vous obtenez l'erreur `EPERM: operation not permitted, rmdir`, c'est un problème courant avec OneDrive et Vite :
+
+**Solutions :**
+1. **Utilisez le script fourni** : `start-dev.bat` (Windows) ou `start-dev.sh` (Linux/Mac)
+2. **Déplacez le projet** hors du dossier OneDrive
+3. **Nettoyage manuel** :
+   ```bash
+   # Supprimer le cache et redémarrer
+   rm -rf node_modules/.vite
+   npm run dev
+   ```
+
+### Problèmes de dépendances
+
+```bash
+# Réinstaller les dépendances
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Données perdues
+
+Les données sont stockées dans le navigateur. Si elles disparaissent :
+1. **Vérifiez** que vous utilisez le même navigateur
+2. **Importez** une sauvegarde JSON si vous en avez une
+3. **Les données initiales** se rechargent automatiquement au premier lancement
 
 **Bonne collecte de fonds ! 🌼**
