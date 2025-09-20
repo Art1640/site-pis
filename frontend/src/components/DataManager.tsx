@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { FundraisingRecord } from '../types'
 import { apiService } from '../services/api'
 
 interface DataManagerProps {
