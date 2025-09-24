@@ -6,7 +6,7 @@ const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navItems = [
-    { path: '/', label: 'Accueil' },
+    { path: '/', label: 'Home' },
     { path: '/classement', label: 'Classement' },
     { path: '/activites', label: 'Activités' },
     { path: '/collectes', label: 'Détails' },

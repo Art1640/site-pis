@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useRecords } from '../hooks/useData'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -12,6 +12,10 @@ const AllRecordsPage: React.FC = () => {
   const { records, loading, error } = useRecords()
   const [sortField, setSortField] = useState<SortField>('Date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [filterQui, setFilterQui] = useState<string>('')
+  const [filterType, setFilterType] = useState<string>('')
+  const [showQuiDropdown, setShowQuiDropdown] = useState(false)
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false)
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -25,7 +29,15 @@ const AllRecordsPage: React.FC = () => {
   const filteredAndSortedRecords = useMemo(() => {
     if (!records) return []
 
-    return records.sort((a, b) => {
+    // Apply filters
+    let filtered = records.filter(record => {
+      const matchesQui = filterQui === '' || record.Qui === filterQui
+      const matchesType = filterType === '' || record.Type === filterType
+      return matchesQui && matchesType
+    })
+
+    // Apply sorting
+    return filtered.sort((a, b) => {
       let aValue = a[sortField]
       let bValue = b[sortField]
 
@@ -43,7 +55,52 @@ const AllRecordsPage: React.FC = () => {
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
       return 0
     })
-  }, [records, sortField, sortDirection])
+  }, [records, sortField, sortDirection, filterQui, filterType])
+
+  // Get unique values for filters
+  const uniqueQui = useMemo(() => {
+    if (!records) return []
+    return [...new Set(records.map(r => r.Qui))].sort()
+  }, [records])
+
+  const uniqueTypes = useMemo(() => {
+    if (!records) return []
+    return [...new Set(records.map(r => r.Type))].sort()
+  }, [records])
+
+  const resetFilters = () => {
+    setFilterQui('')
+    setFilterType('')
+  }
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowQuiDropdown(false)
+      setShowTypeDropdown(false)
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
+  const getFilterIcon = (hasFilter: boolean) => {
+    return (
+      <svg
+        className={`w-4 h-4 ${hasFilter ? 'text-yellow-300' : 'text-gray-300'}`}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+        />
+      </svg>
+    )
+  }
 
   if (loading) {
     return <LoadingSpinner message="Chargement des collectes..." />
@@ -81,36 +138,147 @@ const AllRecordsPage: React.FC = () => {
     <div className="max-w-7xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-scouts-blue mb-4">
-          Liste des actis
+          Liste des activités
         </h1>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg p-6">
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto">
-            <thead>
+      <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col h-[700px] overflow-hidden">
+        {/* Scrollable Table Container */}
+        <div className="flex-1 overflow-y-auto overflow-x-auto" style={{ scrollBehavior: 'smooth', maxHeight: '620px' }}>
+          <table className="w-full table-fixed" style={{ width: '1200px' }}>
+            <thead className="sticky top-0 bg-white z-10">
               <tr className="bg-scouts-blue text-white">
-                {[
-                  { key: 'Date' as SortField, label: 'Date' },
-                  { key: 'Qui' as SortField, label: 'Qui' },
-                  { key: 'Type' as SortField, label: 'Type' },
-                  { key: 'Activité' as SortField, label: 'Activité' },
-                  { key: 'Détails' as SortField, label: 'Détails' },
-                  { key: 'Montant' as SortField, label: 'Montant' },
-                ].map(({ key, label }) => (
-                  <th
-                    key={key}
-                    onClick={() => handleSort(key)}
-                    className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider cursor-pointer hover:bg-scouts-blue-dark transition-colors"
-                  >
-                    <div className="flex items-center space-x-1">
-                      <span>{label}</span>
-                      {getSortIcon(key)}
+                {/* Date - Sortable */}
+                <th
+                  onClick={() => handleSort('Date')}
+                  className="w-32 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider cursor-pointer hover:bg-scouts-blue-dark transition-colors"
+                >
+                  <div className="flex items-center space-x-1">
+                    <span>Date</span>
+                    {getSortIcon('Date')}
+                  </div>
+                </th>
+
+                {/* Qui - Filterable */}
+                <th className="w-32 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider relative group">
+                  <div className="flex items-center space-x-1">
+                    <span>Qui</span>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (filterQui) {
+                            setFilterQui('')
+                          } else {
+                            setShowQuiDropdown(!showQuiDropdown)
+                            setShowTypeDropdown(false)
+                          }
+                        }}
+                        className="flex items-center space-x-1 hover:bg-scouts-blue-dark rounded px-1 transition-colors"
+                      >
+                        {getFilterIcon(!!filterQui)}
+                      </button>
+                      {showQuiDropdown && (
+                        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-50 max-h-48 overflow-y-auto whitespace-nowrap">
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setFilterQui('')
+                              setShowQuiDropdown(false)
+                            }}
+                            className="px-3 py-1 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer"
+                          >
+                            Tous
+                          </div>
+                          {uniqueQui.map(qui => (
+                            <div
+                              key={qui}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setFilterQui(qui)
+                                setShowQuiDropdown(false)
+                              }}
+                              className="px-3 py-1 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer"
+                            >
+                              {qui}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </th>
-                ))}
+                  </div>
+                </th>
+
+                {/* Type - Filterable */}
+                <th className="w-36 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider relative group">
+                  <div className="flex items-center space-x-1">
+                    <span>Type</span>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (filterType) {
+                            setFilterType('')
+                          } else {
+                            setShowTypeDropdown(!showTypeDropdown)
+                            setShowQuiDropdown(false)
+                          }
+                        }}
+                        className="flex items-center space-x-1 hover:bg-scouts-blue-dark rounded px-1 transition-colors"
+                      >
+                        {getFilterIcon(!!filterType)}
+                      </button>
+                      {showTypeDropdown && (
+                        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-50 max-h-48 overflow-y-auto whitespace-nowrap">
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setFilterType('')
+                              setShowTypeDropdown(false)
+                            }}
+                            className="px-3 py-1 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer"
+                          >
+                            Tous
+                          </div>
+                          {uniqueTypes.map(type => (
+                            <div
+                              key={type}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setFilterType(type)
+                                setShowTypeDropdown(false)
+                              }}
+                              className="px-3 py-1 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer"
+                            >
+                              {type}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </th>
+
+                {/* Activité - Not sortable */}
+                <th className="w-44 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                  Activité
+                </th>
+
+                {/* Détails - Not sortable */}
+                <th className="w-96 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                  Détails
+                </th>
+
+                {/* Montant - Sortable */}
+                <th
+                  onClick={() => handleSort('Montant')}
+                  className="w-36 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider cursor-pointer hover:bg-scouts-blue-dark transition-colors"
+                >
+                  <div className="flex items-center space-x-1">
+                    <span>Montant</span>
+                    {getSortIcon('Montant')}
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -138,13 +306,13 @@ const AllRecordsPage: React.FC = () => {
               ))}
             </tbody>
           </table>
-        </div>
 
-        {filteredAndSortedRecords.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            Aucune collecte ne correspond aux critères de recherche.
-          </div>
-        )}
+          {filteredAndSortedRecords.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              Filtre mieux, boufonne.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

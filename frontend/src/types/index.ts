@@ -12,6 +12,8 @@ export interface SummaryData {
   person_totals: { [key: string]: number }
   activity_totals: { [key: string]: number }
   activity_counts: { [key: string]: number }
+  type_totals: { [key: string]: number }
+  type_counts: { [key: string]: number }
   cumulative_data: Array<{
     date: string
     total: number

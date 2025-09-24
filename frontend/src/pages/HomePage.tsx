@@ -349,13 +349,13 @@ const HomePage: React.FC = () => {
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-scouts-green mb-4">
-          Collecte de la Moulah
+          💵💲 Collecte de la Moulah 💲💵
         </h1>
         <h2 className="text-xl text-gray-600 mb-6">
-          Pour financer nos vacances de juillet 2026
+          Pour financer nos vacances de juillet 2026 🥥🌴
         </h2>
         <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-          (to be filled...)
+          Direction Afrique, ou Asie, on verra...
         </p>
       </div>
 
@@ -363,7 +363,7 @@ const HomePage: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div className="text-center md:text-left mb-4 md:mb-0">
             <div className="text-3xl font-bold text-scouts-blue">
-              Richesse actuelle : {formatCurrency(summary.total_funds)}
+              Richesse actuelle: {formatCurrency(summary.total_funds)}
             </div>
           </div>
 

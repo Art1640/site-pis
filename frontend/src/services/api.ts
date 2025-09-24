@@ -51,6 +51,14 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
     activity_counts[record.Activité] = (activity_counts[record.Activité] || 0) + 1
   })
 
+  // Group by type
+  const type_totals: { [key: string]: number } = {}
+  const type_counts: { [key: string]: number } = {}
+  records.forEach(record => {
+    type_totals[record.Type] = (type_totals[record.Type] || 0) + record.Montant
+    type_counts[record.Type] = (type_counts[record.Type] || 0) + 1
+  })
+
   // Create cumulative data for all dates from Sept 1, 2025 to June 30, 2026
   const startDate = new Date('2025-09-01')
   const endDate = new Date('2026-06-30')
@@ -87,6 +95,8 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
     person_totals,
     activity_totals,
     activity_counts,
+    type_totals,
+    type_counts,
     cumulative_data
   }
 }
