@@ -68,11 +68,6 @@ const AllRecordsPage: React.FC = () => {
     return [...new Set(records.map(r => r.Type))].sort()
   }, [records])
 
-  const resetFilters = () => {
-    setFilterQui('')
-    setFilterType('')
-  }
-
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
