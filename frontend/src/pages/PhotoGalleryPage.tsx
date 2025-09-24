@@ -14,11 +14,7 @@ const PhotoGalleryPage: React.FC = () => {
 
         // Common image file names to try
         const commonPhotoNames = [
-          'IMG_0044.jpg', 'IMG_0047.jpg', 'IMG_0059.JPG',
-          'photo1.jpg', 'photo2.jpg', 'photo3.jpg', 'photo4.jpg', 'photo5.jpg',
-          'image1.jpg', 'image2.jpg', 'image3.jpg', 'image4.jpg', 'image5.jpg',
-          '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg',
-          'scouts1.jpg', 'scouts2.jpg', 'scouts3.jpg', 'groupe.jpg'
+          'IMG_0044.jpg', 'IMG_0047.jpg', 'IMG_0059.JPG'
         ]
 
         const existingPhotos: string[] = []

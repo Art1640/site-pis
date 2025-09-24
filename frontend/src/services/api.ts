@@ -1,26 +1,10 @@
 import { FundraisingRecord, SummaryData } from '../types'
+import initialData from '../data/fundraising-data.json'
 
 const STORAGE_KEY = 'pissenlits-fundraising-data'
 
-// Sample data for initial setup
-const INITIAL_DATA: FundraisingRecord[] = [
-  {
-    "Date": "2025-09-01",
-    "Qui": "Groupe",
-    "Type": "Début d'année",
-    "Activité": "Début d'année",
-    "Détails": "",
-    "Montant": 330,
-  },
-  {
-    "Date": "2025-09-18",
-    "Qui": "Groupe",
-    "Type": "Bar Pi",
-    "Activité": "Bar Pi #1",
-    "Détails": "Tout le monde présent, grosse caisse, sympa :)",
-    "Montant": -35
-  },
-]
+// Import data from JSON file - easier to maintain
+const INITIAL_DATA: FundraisingRecord[] = initialData
 
 // Helper functions for localStorage
 const loadFromStorage = (): FundraisingRecord[] => {
