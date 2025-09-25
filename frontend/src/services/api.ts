@@ -6,28 +6,28 @@ const STORAGE_KEY = 'pissenlits-fundraising-data'
 // Import data from JSON file - easier to maintain
 const INITIAL_DATA: FundraisingRecord[] = initialData
 
-// Helper functions for localStorage
+// Helper functions for sessionStorage (always fresh data on new browser sessions)
 const loadFromStorage = (): FundraisingRecord[] => {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
+    const stored = sessionStorage.getItem(STORAGE_KEY)
     if (stored) {
       return JSON.parse(stored)
     } else {
-      // First time - initialize with sample data
+      // First time in this session - initialize with fresh data from JSON
       saveToStorage(INITIAL_DATA)
       return INITIAL_DATA
     }
   } catch (error) {
-    console.error('Error loading from localStorage:', error)
+    console.error('Error loading from sessionStorage:', error)
     return INITIAL_DATA
   }
 }
 
 const saveToStorage = (data: FundraisingRecord[]): void => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   } catch (error) {
-    console.error('Error saving to localStorage:', error)
+    console.error('Error saving to sessionStorage:', error)
     throw new Error('Erreur lors de la sauvegarde des données')
   }
 }
@@ -193,7 +193,7 @@ export const apiService = {
   },
 
   clearAllData(): void {
-    localStorage.removeItem(STORAGE_KEY)
+    sessionStorage.removeItem(STORAGE_KEY)
   }
 }
 
