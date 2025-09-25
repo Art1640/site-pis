@@ -16,8 +16,12 @@ function App() {
     setDataVersion(prev => prev + 1)
   }, [])
 
+  // Determine if we're in production (GitHub Pages)
+  const isProduction = import.meta.env.PROD || window.location.hostname.includes('github.io')
+  const basename = isProduction ? '/site-pis' : ''
+
   return (
-    <Router basename={import.meta.env.PROD ? '/site-pis' : ''}>
+    <Router basename={basename}>
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
         <main className="flex-grow container mx-auto px-4 py-8">
