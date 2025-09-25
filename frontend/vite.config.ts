@@ -8,14 +8,13 @@ export default defineConfig(({ command }) => {
     // For development, always use root
     if (command === 'serve') return '/'
 
-    // For production, check environment variables or use root as default
+    // For production, default to root (custom domains like moulah-pi.fr)
     // Set VITE_BASE_PATH environment variable for custom deployments
     const customBase = process.env.VITE_BASE_PATH
-    if (customBase) return customBase
+    if (customBase !== undefined) return customBase
 
-    // Check if building for GitHub Pages (legacy support)
-    const isGitHubPages = process.env.GITHUB_ACTIONS === 'true' ||
-                         process.env.VITE_GITHUB_PAGES === 'true'
+    // Only use GitHub Pages subdirectory if explicitly requested
+    const isGitHubPages = process.env.VITE_GITHUB_PAGES === 'true'
 
     return isGitHubPages ? '/site-pis/' : '/'
   }
