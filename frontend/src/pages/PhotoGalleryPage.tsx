@@ -9,8 +9,19 @@ const PhotoGalleryPage: React.FC = () => {
     // Auto-detect photos in the photos folder
     const loadPhotos = async () => {
       try {
-        // Use the correct base path for GitHub Pages
-        const basePath = window.location.hostname === 'localhost' ? '' : '/site-pis'
+        // Dynamic base path detection based on hosting environment
+        const getBasePath = () => {
+          // For development
+          if (window.location.hostname === 'localhost') return ''
+
+          // For GitHub Pages subdirectory
+          if (window.location.hostname.includes('github.io')) return '/site-pis'
+
+          // For custom domains (like moulah-pi.fr)
+          return ''
+        }
+
+        const basePath = getBasePath()
 
         // Common image file names to try
         const commonPhotoNames = [
@@ -23,15 +34,20 @@ const PhotoGalleryPage: React.FC = () => {
         for (const photoName of commonPhotoNames) {
           try {
             const photoUrl = `${basePath}/photos/${photoName}`
+            console.log(`Testing photo URL: ${photoUrl}`)
             const response = await fetch(photoUrl, { method: 'HEAD' })
             if (response.ok) {
               existingPhotos.push(photoUrl)
+              console.log(`✅ Found photo: ${photoUrl}`)
+            } else {
+              console.log(`❌ Photo not found: ${photoUrl} (${response.status})`)
             }
           } catch (error) {
-            // Photo doesn't exist, skip it
+            console.log(`❌ Error testing photo ${photoName}:`, error)
           }
         }
 
+        console.log(`Found ${existingPhotos.length} photos:`, existingPhotos)
         setPhotos(existingPhotos)
       } catch (error) {
         console.error('Error loading photos:', error)
