@@ -16,9 +16,21 @@ function App() {
     setDataVersion(prev => prev + 1)
   }, [])
 
-  // Determine if we're in production (GitHub Pages)
-  const isProduction = import.meta.env.PROD || window.location.hostname.includes('github.io')
-  const basename = isProduction ? '/site-pis' : ''
+  // Dynamic basename detection based on hosting environment
+  const getBasename = () => {
+    // For development, no basename needed
+    if (import.meta.env.DEV) return ''
+
+    // Check if we're on GitHub Pages
+    if (window.location.hostname.includes('github.io')) {
+      return '/site-pis'
+    }
+
+    // For custom domains (like moulah-pi.fr), use root
+    return ''
+  }
+
+  const basename = getBasename()
 
   return (
     <Router basename={basename}>
