@@ -12,8 +12,9 @@ import {
   Filler,
 } from 'chart.js'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
-import { useSummary, useRecords } from '../hooks/useData'
+import { useSummary, useRecords, useIndividualRecords } from '../hooks/useData'
 import { formatCurrency, formatDate } from '../utils/formatters'
+import { getTotalAmount } from '../utils/amountUtils'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
 
@@ -32,11 +33,12 @@ ChartJS.register(
 const HomePage: React.FC = () => {
   const { summary, loading: summaryLoading, error: summaryError } = useSummary()
   const { records, loading: recordsLoading, error: recordsError } = useRecords()
+  const { records: individualRecords, loading: individualLoading, error: individualError } = useIndividualRecords()
   const [showPerPerson, setShowPerPerson] = useState(false)
 
   // All hooks must be called unconditionally at the top level
-  const loading = summaryLoading || recordsLoading
-  const error = summaryError || recordsError
+  const loading = summaryLoading || recordsLoading || individualLoading
+  const error = summaryError || recordsError || individualError
 
   // Generate full date range from Sept 1, 2025 to June 30, 2026
   const dateRange = useMemo(() => {
@@ -72,7 +74,7 @@ const HomePage: React.FC = () => {
 
         // Add all transactions for this day
         dayRecords.forEach(record => {
-          runningTotal += record.Montant
+          runningTotal += getTotalAmount(record.Montant)
         })
 
         return { date: dateKey, total: runningTotal }
@@ -84,13 +86,13 @@ const HomePage: React.FC = () => {
     return result
   }, [records, dateRange])
 
-  // Create per-person cumulative data
+  // Create per-person cumulative data (use individual records for accurate per-person amounts)
   const { personTotals, uniquePersons } = useMemo(() => {
-    if (!records) return { personTotals: new Map(), uniquePersons: [] }
+    if (!individualRecords) return { personTotals: new Map(), uniquePersons: [] }
 
     const currentDate = new Date()
     const personTotals = new Map()
-    const uniquePersons = [...new Set(records.map(r => r.Qui))]
+    const uniquePersons = [...new Set(individualRecords.map(r => r.Qui))]
 
     // Initialize person totals for each date
     uniquePersons.forEach(person => {
@@ -102,7 +104,7 @@ const HomePage: React.FC = () => {
     })
 
     // Fill in actual data up to current date
-    const sortedRecords = [...records].sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())
+    const sortedRecords = [...individualRecords].sort((a, b) => new Date(a.Date).getTime() - new Date(b.Date).getTime())
 
     uniquePersons.forEach(person => {
       const personData = personTotals.get(person)
@@ -131,7 +133,7 @@ const HomePage: React.FC = () => {
     })
 
     return { personTotals, uniquePersons }
-  }, [records, dateRange])
+  }, [individualRecords, dateRange])
 
   // Colors for different people - distinct colors for easy differentiation
   const personColors = useMemo(() => [

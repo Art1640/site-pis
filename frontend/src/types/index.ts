@@ -4,7 +4,7 @@ export interface FundraisingRecord {
   Type: string
   Activité: string
   Détails: string
-  Montant: number
+  Montant: number | number[]
 }
 
 export interface SummaryData {

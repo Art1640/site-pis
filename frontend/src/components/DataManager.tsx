@@ -22,9 +22,33 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
     setIsSubmitting(true)
 
     try {
+      // Parse Montant - handle both single number and array formats
+      let parsedMontant: number | number[]
+      const montantStr = formData.Montant.trim()
+
+      if (montantStr.startsWith('[') && montantStr.endsWith(']')) {
+        // Array format: [100, 100, 75, 25]
+        try {
+          parsedMontant = JSON.parse(montantStr)
+          if (!Array.isArray(parsedMontant) || !parsedMontant.every(n => typeof n === 'number')) {
+            throw new Error('Invalid array format')
+          }
+        } catch {
+          alert('Format de tableau invalide. Utilisez [100, 100, 75, 25]')
+          return
+        }
+      } else {
+        // Single number format
+        parsedMontant = parseFloat(montantStr)
+        if (isNaN(parsedMontant)) {
+          alert('Montant invalide. Utilisez un nombre ou [100, 100, 75, 25]')
+          return
+        }
+      }
+
       await apiService.addRecord({
         ...formData,
-        Montant: parseFloat(formData.Montant)
+        Montant: parsedMontant
       })
       
       // Reset form
@@ -100,6 +124,7 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
                 value={formData.Qui}
                 onChange={(e) => setFormData({ ...formData, Qui: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-scouts-blue focus:border-transparent"
+                placeholder="Ex: Dorcopsis ou Dorcopsis, Sika, Merionne pour plusieurs personnes"
                 required
               />
             </div>
@@ -151,16 +176,17 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Montant (€)</label>
               <input
-                type="number"
-                step="0.01"
+                type="text"
                 value={formData.Montant}
                 onChange={(e) => setFormData({ ...formData, Montant: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-scouts-blue focus:border-transparent"
-                placeholder="Ex: 50.00 ou -25.50 pour une dépense"
-                pattern="-?[0-9]+(\.[0-9]+)?"
-                title="Entrez un montant positif ou négatif (ex: 50.00 ou -25.50)"
+                placeholder="Ex: 300 (partage égal) ou [100, 100, 75, 25] (montants individuels)"
+                title="Entrez un montant unique pour partage égal ou [montant1, montant2, ...] pour montants individuels"
                 required
               />
+              <p className="text-xs text-gray-500 mt-1">
+                💡 Pour plusieurs personnes: montant unique (partage égal) ou [100, 100, 75, 25] (montants individuels)
+              </p>
             </div>
 
 

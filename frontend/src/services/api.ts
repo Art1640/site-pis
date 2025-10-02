@@ -6,6 +6,68 @@ const STORAGE_KEY = 'pissenlits-fundraising-data'
 // Import data from JSON file - easier to maintain
 const INITIAL_DATA: FundraisingRecord[] = initialData
 
+// Helper type for individual records (always have number Montant)
+type IndividualRecord = Omit<FundraisingRecord, 'Montant'> & { Montant: number }
+
+// Utility function to split records with multiple people into individual records
+const splitRecordsForIndividuals = (records: FundraisingRecord[]): IndividualRecord[] => {
+  const individualRecords: IndividualRecord[] = []
+
+  records.forEach(record => {
+    // Check if the "Qui" field contains multiple people (comma-separated)
+    const people = record.Qui.split(',').map(name => name.trim()).filter(name => name.length > 0)
+
+    if (people.length > 1) {
+      // Handle both formats: equal split (number) or individual amounts (array)
+      if (Array.isArray(record.Montant)) {
+        // Individual amounts format: [100, 100, 75, 25]
+        if (record.Montant.length !== people.length) {
+          console.warn(`Mismatch between number of people (${people.length}) and amounts (${record.Montant.length}) for record:`, record)
+          // Fall back to equal split if array length doesn't match
+          const individualAmount = Math.round((record.Montant.reduce((sum, amount) => sum + amount, 0) / people.length) * 100) / 100
+          people.forEach(person => {
+            individualRecords.push({
+              ...record,
+              Qui: person,
+              Montant: individualAmount
+            })
+          })
+        } else {
+          // Create individual records with corresponding amounts
+          people.forEach((person, index) => {
+            individualRecords.push({
+              ...record,
+              Qui: person,
+              Montant: (record.Montant as number[])[index]
+            })
+          })
+        }
+      } else {
+        // Equal split format: 300
+        const individualAmount = Math.round((record.Montant / people.length) * 100) / 100
+
+        // Create individual records for each person
+        people.forEach(person => {
+          individualRecords.push({
+            ...record,
+            Qui: person,
+            Montant: individualAmount
+          })
+        })
+      }
+    } else {
+      // Single person or group activity - keep as is, but ensure Montant is a number
+      const montant = Array.isArray(record.Montant) ? record.Montant[0] || 0 : record.Montant
+      individualRecords.push({
+        ...record,
+        Montant: montant
+      })
+    }
+  })
+
+  return individualRecords
+}
+
 // Helper functions for sessionStorage (always fresh data on new browser sessions)
 const loadFromStorage = (): FundraisingRecord[] => {
   try {
@@ -34,20 +96,31 @@ const saveToStorage = (data: FundraisingRecord[]): void => {
 
 // Calculate summary data from records
 const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
-  // Calculate total funds
-  const total_funds = records.reduce((sum, record) => sum + record.Montant, 0)
+  // Get individual records for person calculations
+  const individualRecords = splitRecordsForIndividuals(records)
 
-  // Group by person for leaderboard
+  // Calculate total funds (use original records to avoid double counting)
+  const total_funds = records.reduce((sum, record) => {
+    const amount = Array.isArray(record.Montant)
+      ? record.Montant.reduce((a, b) => a + b, 0)
+      : record.Montant
+    return sum + amount
+  }, 0)
+
+  // Group by person for leaderboard (use individual records)
   const person_totals: { [key: string]: number } = {}
-  records.forEach(record => {
+  individualRecords.forEach(record => {
     person_totals[record.Qui] = (person_totals[record.Qui] || 0) + record.Montant
   })
 
-  // Group by activity
+  // Group by activity (use original records)
   const activity_totals: { [key: string]: number } = {}
   const activity_counts: { [key: string]: number } = {}
   records.forEach(record => {
-    activity_totals[record.Activité] = (activity_totals[record.Activité] || 0) + record.Montant
+    const amount = Array.isArray(record.Montant)
+      ? record.Montant.reduce((a, b) => a + b, 0)
+      : record.Montant
+    activity_totals[record.Activité] = (activity_totals[record.Activité] || 0) + amount
     activity_counts[record.Activité] = (activity_counts[record.Activité] || 0) + 1
   })
 
@@ -55,7 +128,10 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
   const type_totals: { [key: string]: number } = {}
   const type_counts: { [key: string]: number } = {}
   records.forEach(record => {
-    type_totals[record.Type] = (type_totals[record.Type] || 0) + record.Montant
+    const amount = Array.isArray(record.Montant)
+      ? record.Montant.reduce((a, b) => a + b, 0)
+      : record.Montant
+    type_totals[record.Type] = (type_totals[record.Type] || 0) + amount
     type_counts[record.Type] = (type_counts[record.Type] || 0) + 1
   })
 
@@ -77,7 +153,10 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
 
     // Add all transactions for this day
     dayRecords.forEach(record => {
-      runningTotal += record.Montant
+      const amount = Array.isArray(record.Montant)
+        ? record.Montant.reduce((a, b) => a + b, 0)
+        : record.Montant
+      runningTotal += amount
     })
 
     // Add data point for this date
@@ -110,6 +189,18 @@ export const apiService = {
     } catch (error) {
       console.error('Error fetching records:', error)
       throw new Error('Impossible de charger les données, veuillez réessayer')
+    }
+  },
+
+  async getIndividualRecords(): Promise<IndividualRecord[]> {
+    try {
+      // Simulate async operation
+      await new Promise(resolve => setTimeout(resolve, 100))
+      const records = loadFromStorage()
+      return splitRecordsForIndividuals(records)
+    } catch (error) {
+      console.error('Error fetching individual records:', error)
+      throw new Error('Impossible de charger les données individuelles, veuillez réessayer')
     }
   },
 

@@ -9,6 +9,7 @@ const Navbar: React.FC = () => {
     { path: '/', label: 'Home' },
     { path: '/classement', label: 'Classement' },
     { path: '/activites', label: 'Activités' },
+    { path: '/objectifs-mensuels', label: 'Objectifs Mensuels' },
     { path: '/collectes', label: 'Détails' },
     { path: '/photos', label: 'Ne pas clicker' }
   ]

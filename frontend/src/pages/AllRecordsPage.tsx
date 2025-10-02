@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRecords } from '../hooks/useData'
 import { formatCurrency, formatDate } from '../utils/formatters'
+import { getTotalAmount, formatAmountDisplay, getAmountTooltip, isArrayAmount, getTruncatedText } from '../utils/amountUtils'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
 import { FundraisingRecord } from '../types'
@@ -31,7 +32,19 @@ const AllRecordsPage: React.FC = () => {
 
     // Apply filters
     let filtered = records.filter(record => {
-      const matchesQui = filterQui === '' || record.Qui === filterQui
+      let matchesQui = false
+
+      if (filterQui === '') {
+        // Show all records
+        matchesQui = true
+      } else if (filterQui === 'Groupe') {
+        // Show only records where Qui exactly equals "Groupe"
+        matchesQui = record.Qui === 'Groupe'
+      } else {
+        // Check if the selected person is involved in this record (either individually or as part of a group)
+        matchesQui = record.Qui.split(',').map(name => name.trim()).includes(filterQui)
+      }
+
       const matchesType = filterType === '' || record.Type === filterType
       return matchesQui && matchesType
     })
@@ -44,6 +57,10 @@ const AllRecordsPage: React.FC = () => {
       if (sortField === 'Date') {
         aValue = new Date(aValue as string).getTime()
         bValue = new Date(bValue as string).getTime()
+      } else if (sortField === 'Montant') {
+        // Handle array amounts for sorting
+        aValue = getTotalAmount(aValue as number | number[])
+        bValue = getTotalAmount(bValue as number | number[])
       }
 
       if (typeof aValue === 'string' && typeof bValue === 'string') {
@@ -60,7 +77,11 @@ const AllRecordsPage: React.FC = () => {
   // Get unique values for filters
   const uniqueQui = useMemo(() => {
     if (!records) return []
-    return [...new Set(records.map(r => r.Qui))].sort()
+    // Extract individual names from comma-separated lists, excluding "Groupe"
+    const allNames = records.flatMap(r =>
+      r.Qui.split(',').map(name => name.trim())
+    ).filter(name => name !== 'Groupe')
+    return [...new Set(allNames)].sort()
   }, [records])
 
   const uniqueTypes = useMemo(() => {
@@ -155,7 +176,7 @@ const AllRecordsPage: React.FC = () => {
                 </th>
 
                 {/* Qui - Filterable */}
-                <th className="w-32 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider relative group">
+                <th className="w-48 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider relative group">
                   <div className="flex items-center space-x-1">
                     <span>Qui</span>
                     <div className="relative">
@@ -184,6 +205,16 @@ const AllRecordsPage: React.FC = () => {
                             className="px-3 py-1 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer"
                           >
                             Tous
+                          </div>
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setFilterQui('Groupe')
+                              setShowQuiDropdown(false)
+                            }}
+                            className="px-3 py-1 text-sm text-gray-900 hover:bg-gray-100 cursor-pointer"
+                          >
+                            Groupe
                           </div>
                           {uniqueQui.map(qui => (
                             <div
@@ -283,7 +314,22 @@ const AllRecordsPage: React.FC = () => {
                     {formatDate(record.Date)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {record.Qui}
+                    {(() => {
+                      const { truncated, needsTooltip, original } = getTruncatedText(record.Qui, 25)
+
+                      if (needsTooltip) {
+                        return (
+                          <div className="relative group">
+                            {truncated}
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-pre-line z-10 min-w-max">
+                              {original}
+                            </div>
+                          </div>
+                        )
+                      }
+
+                      return truncated
+                    })()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {record.Type}
@@ -295,7 +341,16 @@ const AllRecordsPage: React.FC = () => {
                     {record.Détails}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-scouts-blue">
-                    {formatCurrency(record.Montant)}
+                    {isArrayAmount(record.Montant) ? (
+                      <div className="relative group">
+                        {formatCurrency(getTotalAmount(record.Montant))}
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-pre-line z-10 min-w-max">
+                          {getAmountTooltip(record.Montant, record.Qui.split(',').map(name => name.trim()))}
+                        </div>
+                      </div>
+                    ) : (
+                      formatCurrency(record.Montant as number)
+                    )}
                   </td>
                 </tr>
               ))}
