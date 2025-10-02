@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRecords } from '../hooks/useData'
 import { formatCurrency, formatDate } from '../utils/formatters'
-import { getTotalAmount, formatAmountDisplay, getAmountTooltip, isArrayAmount, getTruncatedText } from '../utils/amountUtils'
+import { getTotalAmount, getAmountTooltip, isArrayAmount, getTruncatedText } from '../utils/amountUtils'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
 import { FundraisingRecord } from '../types'
