@@ -34,8 +34,8 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/classement" element={<LeaderboardPage />} />
-            <Route path="/activites" element={<ActivitiesPage />} />
             <Route path="/objectifs-mensuels" element={<ObjectifsMensuelsPage />} />
+            <Route path="/activites" element={<ActivitiesPage />} />
             <Route path="/details" element={<AllRecordsPage />} />
             <Route path="/photos" element={<PhotoGalleryPage />} />
           </Routes>

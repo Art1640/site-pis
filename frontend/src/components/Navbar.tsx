@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useSounds } from '../utils/soundUtils'
 
 const Navbar: React.FC = () => {
   const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { playNavigation } = useSounds()
 
   const navItems = [
     { path: '/', label: 'Home' },
     { path: '/classement', label: 'Classement' },
-    { path: '/activites', label: 'Activités' },
     { path: '/objectifs-mensuels', label: 'Objectifs Mensuels' },
+    { path: '/activites', label: 'Activités' },
     { path: '/details', label: 'Détails' },
     { path: '/photos', label: 'Ne pas clicker' }
   ]
@@ -22,11 +24,21 @@ const Navbar: React.FC = () => {
     setIsMobileMenuOpen(false)
   }
 
+  const handleNavClick = () => {
+    playNavigation()
+    closeMobileMenu()
+  }
+
+  const handleLogoClick = () => {
+    playNavigation()
+    closeMobileMenu()
+  }
+
   return (
     <nav className="bg-scouts-blue shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
-          <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
+          <Link to="/" className="flex items-center space-x-2" onClick={handleLogoClick}>
             <div className="text-white text-xl font-bold">
               🌼 Pissenlits 2025-2026 🌼
             </div>
@@ -37,6 +49,7 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={handleNavClick}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === item.path
                     ? 'bg-scouts-blue-dark text-white'
@@ -77,7 +90,7 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                onClick={closeMobileMenu}
+                onClick={handleNavClick}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   location.pathname === item.path
                     ? 'bg-scouts-blue-dark text-white'
