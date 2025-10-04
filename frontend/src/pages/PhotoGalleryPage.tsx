@@ -6,8 +6,8 @@ const PhotoGalleryPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Load photos - since they're in public folder, we can assume they exist
-    const loadPhotos = () => {
+    // Dynamically discover photos in the /photos folder
+    const loadPhotos = async () => {
       try {
         // Dynamic base path detection based on hosting environment
         const getBasePath = () => {
@@ -24,16 +24,28 @@ const PhotoGalleryPage: React.FC = () => {
         const basePath = getBasePath()
         console.log(`🌼 Photo base path: "${basePath}"`)
 
-        // Known image file names (these exist in public/photos/)
-        const photoNames = [
-          'IMG_0044.jpg', 'IMG_0047.jpg', 'IMG_0059.JPG'
-        ]
+        // Fetch the list of photos from the manifest file
+        try {
+          console.log(`📸 Fetching photos from manifest...`)
+          const manifestResponse = await fetch(`${basePath}/photos/photos.json`)
 
-        // Build photo URLs
-        const photoUrls = photoNames.map(name => `${basePath}/photos/${name}`)
-        console.log(`📸 Photo URLs:`, photoUrls)
+          if (manifestResponse.ok) {
+            const photoFilenames = await manifestResponse.json()
+            console.log('📸 Found photos in manifest:', photoFilenames)
 
-        setPhotos(photoUrls)
+            // Build photo URLs from the filenames
+            const photoUrls = photoFilenames.map((filename: string) => `${basePath}/photos/${filename}`)
+            console.log(`📸 Photo URLs:`, photoUrls)
+
+            setPhotos(photoUrls)
+          } else {
+            console.error('❌ Failed to fetch photos manifest')
+            setPhotos([])
+          }
+        } catch (error) {
+          console.error('❌ Error loading photos:', error)
+          setPhotos([])
+        }
       } catch (error) {
         console.error('Error loading photos:', error)
         setPhotos([])
@@ -78,7 +90,7 @@ const PhotoGalleryPage: React.FC = () => {
           <div className="text-sm text-gray-500">
             <p>Debug info (check console for details):</p>
             <p>Hostname: {window.location.hostname}</p>
-            <p>Expected photos: IMG_0044.jpg, IMG_0047.jpg, IMG_0059.JPG</p>
+            <p>Recherche automatique dans le dossier /photos/</p>
           </div>
         </div>
       </div>

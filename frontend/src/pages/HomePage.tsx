@@ -279,11 +279,45 @@ const HomePage: React.FC = () => {
       x: {
         grid: {
           display: true,
-          color: 'rgba(0, 0, 0, 0.05)',
+          color: function(context: any) {
+            const index = context.index
+            if (index >= dateRange.length) return 'transparent'
+
+            const date = new Date(dateRange[index])
+            const day = date.getDate()
+            const month = date.getMonth()
+            const year = date.getFullYear()
+
+            // Show vertical grid lines ONLY at the first day of each month (Sept 2025 to June 2026)
+            if (day === 1) {
+              if ((year === 2025 && month >= 8) || (year === 2026 && month <= 5)) {
+                return 'rgba(0, 0, 0, 0.1)' // Same color as horizontal grid lines
+              }
+            }
+
+            return 'transparent' // Hide all other grid lines
+          },
+          lineWidth: function(context: any) {
+            const index = context.index
+            if (index >= dateRange.length) return 0
+
+            const date = new Date(dateRange[index])
+            const day = date.getDate()
+            const month = date.getMonth()
+            const year = date.getFullYear()
+
+            // Show lines only for first day of each month
+            if (day === 1) {
+              if ((year === 2025 && month >= 8) || (year === 2026 && month <= 5)) {
+                return 1
+              }
+            }
+
+            return 0 // No line width for other days
+          },
         },
         ticks: {
           autoSkip: false,
-          maxTicksLimit: 11,
           callback: function(_value: any, index: number) {
             if (index >= dateRange.length) return ''
 
@@ -292,17 +326,20 @@ const HomePage: React.FC = () => {
             const month = date.getMonth()
             const year = date.getFullYear()
 
-            // Show only the first day of each month from Sept 2025 to July 2026
-            if (day === 1) {
+            // Calculate middle of month for tick labels (centered in month)
+            const daysInMonth = new Date(year, month + 1, 0).getDate()
+            const middleDay = Math.ceil(daysInMonth / 2)
+
+            // Show month labels at the middle of each month from Sept 2025 to June 2026
+            if (day === middleDay) {
               // September 2025 to December 2025
               if (year === 2025 && month >= 8) {
                 return date.toLocaleDateString('fr-FR', {
                   month: 'short',
-                  // year: month === 8 ? '2-digit' : undefined // Show year only for September
                 })
               }
-              // January 2026 to July 2026
-              else if (year === 2026 && month <= 6) {
+              // January 2026 to June 2026 (month 5 = June)
+              else if (year === 2026 && month <= 5) {
                 return date.toLocaleDateString('fr-FR', {
                   month: 'short'
                 })
@@ -314,12 +351,15 @@ const HomePage: React.FC = () => {
           font: {
             size: 11,
           },
+          maxRotation: 0,
+          minRotation: 0,
         },
       },
       y: {
         beginAtZero: true,
         grid: {
           color: 'rgba(0, 0, 0, 0.1)',
+          lineWidth: 1,
         },
         ticks: {
           callback: function(value: any) {

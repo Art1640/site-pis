@@ -10,7 +10,7 @@ const Navbar: React.FC = () => {
     { path: '/classement', label: 'Classement' },
     { path: '/activites', label: 'Activités' },
     { path: '/objectifs-mensuels', label: 'Objectifs Mensuels' },
-    { path: '/collectes', label: 'Détails' },
+    { path: '/details', label: 'Détails' },
     { path: '/photos', label: 'Ne pas clicker' }
   ]
 

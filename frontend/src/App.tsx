@@ -36,7 +36,7 @@ function App() {
             <Route path="/classement" element={<LeaderboardPage />} />
             <Route path="/activites" element={<ActivitiesPage />} />
             <Route path="/objectifs-mensuels" element={<ObjectifsMensuelsPage />} />
-            <Route path="/collectes" element={<AllRecordsPage />} />
+            <Route path="/details" element={<AllRecordsPage />} />
             <Route path="/photos" element={<PhotoGalleryPage />} />
           </Routes>
         </main>
