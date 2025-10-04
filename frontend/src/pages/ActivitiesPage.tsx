@@ -111,34 +111,34 @@ const ActivitiesPage: React.FC = () => {
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[700px]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:h-[700px]">
         {/* Pie Chart Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col h-full">
-          <h3 className="text-3xl font-bold text-center mb-8">Pie Chart!</h3>
+        <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[400px] lg:h-full">
+          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-8">Pie Chart!</h3>
           <div className="flex-1 flex justify-center items-center">
-            <div className="w-full h-full max-h-[500px]">
+            <div className="w-full h-full max-h-[300px] md:max-h-[500px]">
               <Pie data={chartData} options={chartOptions} />
             </div>
           </div>
         </div>
 
         {/* Details Table Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col h-full overflow-hidden">
-          <h3 className="text-3xl font-bold text-center mb-8">Détails par type</h3>
-          <div className="flex-1 overflow-y-auto overflow-x-hidden" style={{ scrollBehavior: 'smooth', maxHeight: '550px' }}>
+        <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[400px] lg:h-full overflow-hidden">
+          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-8">Détails par type</h3>
+          <div className="flex-1 overflow-y-auto overflow-x-auto" style={{ scrollBehavior: 'smooth', maxHeight: '350px' }}>
             <table className="min-w-full table-auto">
               <thead className="sticky top-0 bg-white z-10">
                 <tr className="bg-scouts-blue text-white">
-                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
                     Activité
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
                     Montant total gagné
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
                     Nombre d'actis
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                  <th className="px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
                     %
                   </th>
                 </tr>
@@ -149,22 +149,22 @@ const ActivitiesPage: React.FC = () => {
                   const percentage = ((amount / summary.total_funds) * 100).toFixed(1)
                   return (
                     <tr key={type} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div
-                            className="w-4 h-4 rounded-full mr-3"
+                            className="w-3 h-3 md:w-4 md:h-4 rounded-full mr-2 md:mr-3"
                             style={{ backgroundColor: colors[index % colors.length] }}
                           ></div>
-                          <div className="text-sm font-medium text-gray-900">{type}</div>
+                          <div className="text-xs md:text-sm font-medium text-gray-900">{type}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                      <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900 font-semibold">
                         {formatCurrency(amount)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                         {formatNumber(count)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                         {percentage}%
                       </td>
                     </tr>

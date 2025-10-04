@@ -181,16 +181,16 @@ const LeaderboardPage: React.FC = () => {
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[700px]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:h-[700px]">
         {/* Podium Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col h-full">
-          <h3 className="text-3xl font-bold text-center mb-8">🏆 Podium individuel</h3>
+        <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[400px] lg:h-full">
+          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-8">🏆 Podium individuel</h3>
           <div className="flex-1 flex justify-center items-center min-h-0">
-            <div className="flex justify-center items-end space-x-6">
+            <div className="flex justify-center items-end space-x-3 md:space-x-6">
               {podiumOrder.map((contributor, index) => {
                 if (!contributor) {
                   // Empty slot for missing podium positions
-                  return <div key={`empty-${index}`} className="w-28"></div>
+                  return <div key={`empty-${index}`} className="w-20 md:w-28"></div>
                 }
 
                 const [name, amount] = contributor
@@ -200,16 +200,16 @@ const LeaderboardPage: React.FC = () => {
 
                 return (
                   <div key={name} className="text-center">
-                    <div className="text-5xl mb-4">{getPodiumPosition(displayPosition)}</div>
+                    <div className="text-3xl md:text-5xl mb-2 md:mb-4">{getPodiumPosition(displayPosition)}</div>
                     <div className={`bg-gradient-to-t ${
                       actualRank === 1 ? 'from-yellow-400 to-yellow-300' :
                       actualRank === 2 ? 'from-gray-400 to-gray-300' :
                       'from-orange-400 to-orange-300'
-                    } ${getPodiumHeight(displayPosition)} w-28 rounded-t-lg flex items-end justify-center pb-3`}>
-                      <div className="text-white font-bold text-lg">{actualRank}</div>
+                    } ${getPodiumHeight(displayPosition)} w-20 md:w-28 rounded-t-lg flex items-end justify-center pb-2 md:pb-3`}>
+                      <div className="text-white font-bold text-sm md:text-lg">{actualRank}</div>
                     </div>
-                    <div className="mt-3 font-semibold text-scouts-blue text-lg">{name}</div>
-                    <div className="text-sm text-gray-600">{formatCurrency(amount)}</div>
+                    <div className="mt-2 md:mt-3 font-semibold text-scouts-blue text-sm md:text-lg">{name}</div>
+                    <div className="text-xs md:text-sm text-gray-600">{formatCurrency(amount)}</div>
                   </div>
                 )
               })}
@@ -218,10 +218,10 @@ const LeaderboardPage: React.FC = () => {
         </div>
 
         {/* Full Ranking Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col h-full overflow-hidden">
-          <h3 className="text-3xl font-bold text-center mb-8">📊 Classement complet</h3>
-          <div className="flex-1 overflow-y-auto overflow-x-hidden" style={{ scrollBehavior: 'smooth', maxHeight: '550px' }}>
-            <div style={{ height: sortedContributors.length * 50 + 'px', minHeight: '550px' }}>
+        <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[400px] lg:h-full overflow-hidden">
+          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-8">📊 Classement complet</h3>
+          <div className="flex-1 overflow-y-auto overflow-x-auto" style={{ scrollBehavior: 'smooth' }}>
+            <div className="h-full min-h-[300px] lg:min-h-[500px]">
               <Bar data={chartData} options={chartOptions} />
             </div>
           </div>

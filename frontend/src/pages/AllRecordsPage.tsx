@@ -158,16 +158,16 @@ const AllRecordsPage: React.FC = () => {
         </h1>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col h-[700px] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[700px] overflow-hidden">
         {/* Scrollable Table Container */}
         <div className="flex-1 overflow-y-auto overflow-x-auto" style={{ scrollBehavior: 'smooth', maxHeight: '620px' }}>
-          <table className="w-full table-fixed" style={{ width: '1200px' }}>
+          <table className="w-full table-fixed min-w-[800px] md:min-w-[1200px]">
             <thead className="sticky top-0 bg-white z-10">
               <tr className="bg-scouts-blue text-white">
                 {/* Date - Sortable */}
                 <th
                   onClick={() => handleSort('Date')}
-                  className="w-32 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider cursor-pointer hover:bg-scouts-blue-dark transition-colors"
+                  className="w-24 md:w-32 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider cursor-pointer hover:bg-scouts-blue-dark transition-colors"
                 >
                   <div className="flex items-center space-x-1">
                     <span>Date</span>
@@ -176,7 +176,7 @@ const AllRecordsPage: React.FC = () => {
                 </th>
 
                 {/* Qui - Filterable */}
-                <th className="w-48 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider relative group">
+                <th className="w-32 md:w-48 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider relative group">
                   <div className="flex items-center space-x-1">
                     <span>Qui</span>
                     <div className="relative">
@@ -236,7 +236,7 @@ const AllRecordsPage: React.FC = () => {
                 </th>
 
                 {/* Type - Filterable */}
-                <th className="w-36 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider relative group">
+                <th className="w-24 md:w-36 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider relative group">
                   <div className="flex items-center space-x-1">
                     <span>Type</span>
                     <div className="relative">
@@ -286,19 +286,19 @@ const AllRecordsPage: React.FC = () => {
                 </th>
 
                 {/* Activité - Not sortable */}
-                <th className="w-44 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                <th className="w-32 md:w-44 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
                   Activité
                 </th>
 
                 {/* Détails - Not sortable */}
-                <th className="w-96 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
+                <th className="w-48 md:w-96 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
                   Détails
                 </th>
 
                 {/* Montant - Sortable */}
                 <th
                   onClick={() => handleSort('Montant')}
-                  className="w-36 px-6 py-3 text-left text-sm font-medium uppercase tracking-wider cursor-pointer hover:bg-scouts-blue-dark transition-colors"
+                  className="w-24 md:w-36 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider cursor-pointer hover:bg-scouts-blue-dark transition-colors"
                 >
                   <div className="flex items-center space-x-1">
                     <span>Montant</span>
@@ -310,10 +310,10 @@ const AllRecordsPage: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredAndSortedRecords.map((record, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                     {formatDate(record.Date)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm font-medium text-gray-900">
                     {(() => {
                       const { truncated, needsTooltip, original } = getTruncatedText(record.Qui, 25)
 
@@ -331,16 +331,16 @@ const AllRecordsPage: React.FC = () => {
                       return truncated
                     })()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                     {record.Type}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                     {record.Activité}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                  <td className="px-3 md:px-6 py-4 text-xs md:text-sm text-gray-900 max-w-xs truncate">
                     {record.Détails}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-scouts-blue">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm font-semibold text-scouts-blue">
                     {isArrayAmount(record.Montant) ? (
                       <div className="relative group">
                         {formatCurrency(getTotalAmount(record.Montant))}

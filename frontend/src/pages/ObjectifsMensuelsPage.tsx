@@ -136,13 +136,14 @@ const ObjectifsMensuelsPage: React.FC = () => {
         </h1>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg p-8 flex flex-col h-[700px] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[700px] overflow-hidden">
         {/* Scrollable Table Container */}
         <div className="flex-1 overflow-y-auto overflow-x-auto" style={{ scrollBehavior: 'smooth', maxHeight: '620px' }}>
-          <table className="w-full table-fixed border-collapse" style={{ minWidth: `${150 + months.length * 120}px` }}>
+          <table className="w-full table-fixed border-collapse" style={{ minWidth: `${100 + months.length * 80}px` }}>
             <thead className="sticky top-0 bg-white z-10">
               <tr className="bg-scouts-blue text-white">
-                <th className="w-32 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider border-r border-scouts-blue-dark">
+                <th className="w-20 md:w-32 px-2 md:px-4 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider border-r border-scouts-blue-dark">
+                  Personne
                 </th>
                 {months.map(month => {
                   const currentDate = new Date()
@@ -150,7 +151,7 @@ const ObjectifsMensuelsPage: React.FC = () => {
                   const isFutureMonth = month.key > currentMonthKey
 
                   return (
-                    <th key={month.label} className={`w-32 px-6 py-3 text-center text-sm font-medium uppercase tracking-wider border-r border-scouts-blue-dark ${isFutureMonth ? 'bg-scouts-blue/70 text-white/70' : ''}`}>
+                    <th key={month.label} className={`w-20 md:w-32 px-2 md:px-6 py-3 text-center text-xs md:text-sm font-medium uppercase tracking-wider border-r border-scouts-blue-dark ${isFutureMonth ? 'bg-scouts-blue/70 text-white/70' : ''}`}>
                       {month.label}
                     </th>
                   )
@@ -160,7 +161,7 @@ const ObjectifsMensuelsPage: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {individualNames.map((name, index) => (
                 <tr key={name} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">
+                  <td className="px-2 md:px-4 py-4 whitespace-nowrap text-xs md:text-sm font-medium text-gray-900 border-r border-gray-200">
                     {name}
                   </td>
                   {months.map(month => {
@@ -176,7 +177,7 @@ const ObjectifsMensuelsPage: React.FC = () => {
                     const isWorst = monthRanking?.worst.includes(name) || false
 
                     return (
-                      <td key={month.label} className={`px-6 py-4 whitespace-nowrap text-sm text-center border-r border-gray-200 ${isFutureMonth ? 'bg-gray-100 text-gray-400' : 'text-gray-900'}`}>
+                      <td key={month.label} className={`px-2 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-center border-r border-gray-200 ${isFutureMonth ? 'bg-gray-100 text-gray-400' : 'text-gray-900'}`}>
                         {isFutureMonth ? (
                           '-'
                         ) : (
