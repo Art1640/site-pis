@@ -13,31 +13,23 @@
     "Type": "Bar Pi",
     "Activité": "Bar Pi #1",
     "Détails": "Tout le monde présent, grosse caisse, sympa :)",
-    "Montant": 139.03
+    "Montant": 141.03
 
   },
   {
-    "Date": "2025-09-28",
-    "Qui": "Dorcopsis, Sika, Merionne, Charlotte, X",
-    "Type": "Delhaize",
+    "Date": "2025-09-27",
+    "Qui": "Dorcopsis, Sika, Merionne, Charlotte, Elena, Nathan",
+    "Type": "Caisses",
     "Activité": "Delhaize",
-    "Détails": "Fort Jaco",
-    "Montant": 300
+    "Détails": "Delhaize Fort Jaco",
+    "Montant": 295.36
   },
   {
-    "Date": "2025-09-30",
-    "Qui": "Occicat, Charlotte, Voisin",
-    "Type": "Vente",
-    "Activité": "Vente de cookies",
-    "Détails": "",
-    "Montant": [50, 50, 20]
-  },
-  {
-    "Date": "2025-10-02",
+    "Date": "2025-10-05",
     "Qui": "Nevala, Tanuki",
     "Type": "Vente",
     "Activité": "Marché de Waterloo",
-    "Détails": "",
-    "Montant": 150
+    "Détails": "Cookies et brochettes de bonbons",
+    "Montant": 125.5
   }
 ]
