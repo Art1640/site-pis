@@ -7,8 +7,12 @@ import ActivitiesPage from './pages/ActivitiesPage'
 import ObjectifsMensuelsPage from './pages/ObjectifsMensuelsPage'
 import AllRecordsPage from './pages/AllRecordsPage'
 import PhotoGalleryPage from './pages/PhotoGalleryPage'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+import LoginScreen from './components/LoginScreen'
 
-function App() {
+// Protected App Component
+const ProtectedApp: React.FC = () => {
+  const { isAuthenticated } = useAuth()
 
   // Dynamic basename detection based on hosting environment
   const getBasename = () => {
@@ -25,6 +29,10 @@ function App() {
   }
 
   const basename = getBasename()
+
+  if (!isAuthenticated) {
+    return <LoginScreen />
+  }
 
   return (
     <Router basename={basename}>
@@ -43,6 +51,14 @@ function App() {
         <Footer />
       </div>
     </Router>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <ProtectedApp />
+    </AuthProvider>
   )
 }
 

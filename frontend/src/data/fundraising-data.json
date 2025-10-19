@@ -1,24 +1,15 @@
 [
   {
-    "Date": "2025-09-01",
-    "Qui": "Groupe",
-    "Type": "Début d'année",
-    "Activité": "Début d'année",
-    "Détails": "",
-    "Montant": 330
-  },
-  {
     "Date": "2025-09-18",
     "Qui": "Groupe",
     "Type": "Bar Pi",
     "Activité": "Bar Pi #1",
     "Détails": "Tout le monde présent, grosse caisse, sympa :)",
-    "Montant": 141.03
-
+    "Montant": 150.03
   },
   {
     "Date": "2025-09-27",
-    "Qui": "Dorcopsis, Sika, Merionne, Charlotte, Elena, Nathan",
+    "Qui": "Dorcopsis, Sika, Merione, Charlotte, Elena, Nathan",
     "Type": "Caisses",
     "Activité": "Delhaize",
     "Détails": "Delhaize Fort Jaco",
@@ -38,6 +29,46 @@
     "Type": "Vente",
     "Activité": "Marché de Waterloo",
     "Détails": "Cookies et brochettes de bonbons",
-    "Montant": 125.5
+    "Montant": 161.5
+  },
+  {
+    "Date": "2025-10-09",
+    "Qui": "Charlotte",
+    "Type": "Babysitting",
+    "Activité": "",
+    "Détails": "",
+    "Montant": 10
+  },
+  {
+    "Date": "2025-10-09",
+    "Qui": "Merione",
+    "Type": "Babysitting",
+    "Activité": "",
+    "Détails": "",
+    "Montant": 27
+  },
+  {
+    "Date": "2025-10-12",
+    "Qui": "Elena, Charlotte, Adrien, Bastien, Merione",
+    "Type": "Action",
+    "Activité": "Vente de chaussettes",
+    "Détails": "",
+    "Montant": [33, 21, 60, 48, 111]
+  },
+  {
+    "Date": "2025-10-18",
+    "Qui": "Viktor, Bastien, Adrien",
+    "Type": "Caisses",
+    "Activité": "Grande Epicerie",
+    "Détails": "Grande Epicerie Fort Jaco",
+    "Montant": 206.5
+  },
+  {
+    "Date": "2025-10-19",
+    "Qui": "Dorcopsis, Sika, Elena",
+    "Type": "Caisses",
+    "Activité": "Delhaize",
+    "Détails": "Delhaize Fort Jaco",
+    "Montant": 268.78
   }
 ]

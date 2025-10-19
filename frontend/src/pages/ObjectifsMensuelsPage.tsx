@@ -92,16 +92,21 @@ const ObjectifsMensuelsPage: React.FC = () => {
 
       if (monthAmounts.length === 0) return
 
+      // Exclude Nathan from ranking calculations
+      const rankingAmounts = monthAmounts.filter(p => p.name !== 'Nathan')
+
+      if (rankingAmounts.length === 0) return
+
       // Sort by amount (highest first)
-      monthAmounts.sort((a, b) => b.amount - a.amount)
+      rankingAmounts.sort((a, b) => b.amount - a.amount)
 
-      const maxAmount = monthAmounts[0].amount
-      const minAmount = monthAmounts[monthAmounts.length - 1].amount
+      const maxAmount = rankingAmounts[0].amount
+      const minAmount = rankingAmounts[rankingAmounts.length - 1].amount
 
-      // Get all people with max amount (in case of ties)
-      const best = monthAmounts.filter(p => p.amount === maxAmount && p.amount > 0).map(p => p.name)
-      // Get all people with min amount (in case of ties)
-      const worst = monthAmounts.filter(p => p.amount === minAmount).map(p => p.name)
+      // Get all people with max amount (in case of ties) - excluding Nathan
+      const best = rankingAmounts.filter(p => p.amount === maxAmount && p.amount > 0).map(p => p.name)
+      // Get all people with min amount (in case of ties) - excluding Nathan
+      const worst = rankingAmounts.filter(p => p.amount === minAmount).map(p => p.name)
 
       rankings.set(month.key, { best, worst })
     })
@@ -162,7 +167,7 @@ const ObjectifsMensuelsPage: React.FC = () => {
               {individualNames.map((name, index) => (
                 <tr key={name} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                   <td className="px-2 md:px-4 py-4 whitespace-nowrap text-xs md:text-sm font-medium text-gray-900 border-r border-gray-200">
-                    {name}
+                    {name} {name === 'Nathan' && '💀'}
                   </td>
                   {months.map(month => {
                     const amount = monthlyAmounts.get(name)?.get(month.key) || 0
@@ -175,6 +180,7 @@ const ObjectifsMensuelsPage: React.FC = () => {
                     const monthRanking = getMonthlyRankings.get(month.key)
                     const isBest = monthRanking?.best.includes(name) || false
                     const isWorst = monthRanking?.worst.includes(name) || false
+                    const isNathan = name === 'Nathan'
 
                     return (
                       <td key={month.label} className={`px-2 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-center border-r border-gray-200 ${isFutureMonth ? 'bg-gray-100 text-gray-400' : 'text-gray-900'}`}>
@@ -185,10 +191,10 @@ const ObjectifsMensuelsPage: React.FC = () => {
                             <span className={`px-2 py-1 rounded-md font-medium ${colorClasses}`}>
                               {formatCurrency(amount)}
                             </span>
-                            {isBest && (
+                            {!isNathan && isBest && (
                               <span className="absolute -top-2 -right-2 text-xs z-10">👑</span>
                             )}
-                            {isWorst && !isBest && (
+                            {!isNathan && isWorst && !isBest && (
                               <span className="absolute -top-2 -right-2 text-xs z-10">💩</span>
                             )}
                           </div>
