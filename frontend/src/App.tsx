@@ -8,6 +8,7 @@ import ObjectifsMensuelsPage from './pages/ObjectifsMensuelsPage'
 import AllRecordsPage from './pages/AllRecordsPage'
 import PhotoGalleryPage from './pages/PhotoGalleryPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { RefreshProvider } from './contexts/RefreshContext'
 import LoginScreen from './components/LoginScreen'
 
 // Protected App Component
@@ -35,22 +36,24 @@ const ProtectedApp: React.FC = () => {
   }
 
   return (
-    <Router basename={basename}>
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <Navbar />
-        <main className="flex-grow container mx-auto px-4 py-8">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/classement" element={<LeaderboardPage />} />
-            <Route path="/objectifs-mensuels" element={<ObjectifsMensuelsPage />} />
-            <Route path="/activites" element={<ActivitiesPage />} />
-            <Route path="/details" element={<AllRecordsPage />} />
-            <Route path="/photos" element={<PhotoGalleryPage />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <RefreshProvider>
+      <Router basename={basename}>
+        <div className="min-h-screen flex flex-col bg-gray-50">
+          <Navbar />
+          <main className="flex-grow container mx-auto px-4 py-8">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/classement" element={<LeaderboardPage />} />
+              <Route path="/objectifs-mensuels" element={<ObjectifsMensuelsPage />} />
+              <Route path="/activites" element={<ActivitiesPage />} />
+              <Route path="/details" element={<AllRecordsPage />} />
+              <Route path="/photos" element={<PhotoGalleryPage />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </Router>
+    </RefreshProvider>
   )
 }
 

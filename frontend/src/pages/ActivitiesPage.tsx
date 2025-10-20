@@ -11,11 +11,13 @@ import { useSummary } from '../hooks/useData'
 import { formatCurrency, formatNumber } from '../utils/formatters'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
+import { useRefresh } from '../contexts/RefreshContext'
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels)
 
 const ActivitiesPage: React.FC = () => {
-  const { summary, loading, error } = useSummary()
+  const { refreshTrigger } = useRefresh()
+  const { summary, loading, error } = useSummary(refreshTrigger)
 
   if (loading) {
     return <LoadingSpinner message="Chargement des activités..." />

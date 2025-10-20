@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { apiService } from '../services/api'
+import { useRefresh } from '../contexts/RefreshContext'
 
 interface DataManagerProps {
-  onDataChange: () => void
+  onDataChange?: () => void // Made optional for backward compatibility
 }
 
 const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
+  const { refreshData } = useRefresh()
   const [isOpen, setIsOpen] = useState(false)
   const [formData, setFormData] = useState({
     Date: new Date().toISOString().split('T')[0],
@@ -62,7 +64,13 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       })
       
       setIsOpen(false)
-      onDataChange() // Refresh the data
+
+      // Use the new refresh system, fallback to onDataChange for backward compatibility
+      if (onDataChange) {
+        onDataChange()
+      } else {
+        await refreshData()
+      }
     } catch (error) {
       console.error('Error adding record:', error)
       alert('Erreur lors de l\'ajout de l\'enregistrement')

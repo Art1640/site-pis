@@ -5,7 +5,7 @@ import { apiService } from '../services/api'
 // Helper type for individual records (always have number Montant)
 type IndividualRecord = Omit<FundraisingRecord, 'Montant'> & { Montant: number }
 
-export const useRecords = () => {
+export const useRecords = (refreshTrigger?: number) => {
   const [records, setRecords] = useState<FundraisingRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -25,12 +25,12 @@ export const useRecords = () => {
     }
 
     fetchRecords()
-  }, [])
+  }, [refreshTrigger])
 
   return { records, loading, error }
 }
 
-export const useIndividualRecords = () => {
+export const useIndividualRecords = (refreshTrigger?: number) => {
   const [records, setRecords] = useState<IndividualRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -50,12 +50,12 @@ export const useIndividualRecords = () => {
     }
 
     fetchRecords()
-  }, [])
+  }, [refreshTrigger])
 
   return { records, loading, error }
 }
 
-export const useSummary = () => {
+export const useSummary = (refreshTrigger?: number) => {
   const [summary, setSummary] = useState<SummaryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -75,7 +75,7 @@ export const useSummary = () => {
     }
 
     fetchSummary()
-  }, [])
+  }, [refreshTrigger])
 
   return { summary, loading, error }
 }

@@ -5,12 +5,14 @@ import { getTotalAmount, getAmountTooltip, isArrayAmount, getTruncatedText } fro
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
 import { FundraisingRecord } from '../types'
+import { useRefresh } from '../contexts/RefreshContext'
 
 type SortField = keyof FundraisingRecord
 type SortDirection = 'asc' | 'desc'
 
 const AllRecordsPage: React.FC = () => {
-  const { records, loading, error } = useRecords()
+  const { refreshTrigger } = useRefresh()
+  const { records, loading, error } = useRecords(refreshTrigger)
   const [sortField, setSortField] = useState<SortField>('Date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [filterQui, setFilterQui] = useState<string>('')

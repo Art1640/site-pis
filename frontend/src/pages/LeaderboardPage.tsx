@@ -13,6 +13,7 @@ import { useSummary } from '../hooks/useData'
 import { formatCurrency } from '../utils/formatters'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
+import { useRefresh } from '../contexts/RefreshContext'
 
 ChartJS.register(
   CategoryScale,
@@ -24,7 +25,8 @@ ChartJS.register(
 )
 
 const LeaderboardPage: React.FC = () => {
-  const { summary, loading, error } = useSummary()
+  const { refreshTrigger } = useRefresh()
+  const { summary, loading, error } = useSummary(refreshTrigger)
 
   if (loading) {
     return <LoadingSpinner message="Chargement du classement..." />

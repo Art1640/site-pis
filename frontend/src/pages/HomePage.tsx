@@ -17,6 +17,7 @@ import { formatCurrency, formatDate } from '../utils/formatters'
 import { getTotalAmount } from '../utils/amountUtils'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
+import { useRefresh } from '../contexts/RefreshContext'
 
 ChartJS.register(
   CategoryScale,
@@ -31,9 +32,10 @@ ChartJS.register(
 )
 
 const HomePage: React.FC = () => {
-  const { summary, loading: summaryLoading, error: summaryError } = useSummary()
-  const { records, loading: recordsLoading, error: recordsError } = useRecords()
-  const { records: individualRecords, loading: individualLoading, error: individualError } = useIndividualRecords()
+  const { refreshTrigger } = useRefresh()
+  const { summary, loading: summaryLoading, error: summaryError } = useSummary(refreshTrigger)
+  const { records, loading: recordsLoading, error: recordsError } = useRecords(refreshTrigger)
+  const { records: individualRecords, loading: individualLoading, error: individualError } = useIndividualRecords(refreshTrigger)
   const [showPerPerson, setShowPerPerson] = useState(false)
 
   // All hooks must be called unconditionally at the top level

@@ -3,10 +3,12 @@ import { useRecords, useIndividualRecords } from '../hooks/useData'
 import { formatCurrency } from '../utils/formatters'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
+import { useRefresh } from '../contexts/RefreshContext'
 
 const ObjectifsMensuelsPage: React.FC = () => {
-  const { records, loading: recordsLoading, error: recordsError } = useRecords()
-  const { records: individualRecords, loading: individualLoading, error: individualError } = useIndividualRecords()
+  const { refreshTrigger } = useRefresh()
+  const { records, loading: recordsLoading, error: recordsError } = useRecords(refreshTrigger)
+  const { records: individualRecords, loading: individualLoading, error: individualError } = useIndividualRecords(refreshTrigger)
 
   const loading = recordsLoading || individualLoading
   const error = recordsError || individualError
