@@ -27,8 +27,8 @@
     "Date": "2025-10-05",
     "Qui": "Nevala, Tanuki",
     "Type": "Vente",
-    "Activité": "Marché de Waterloo",
-    "Détails": "Cookies et brochettes de bonbons",
+    "Activité": "Cookies & Brochettes de bonbons",
+    "Détails": "Marché de Waterloo",
     "Montant": 161.5
   },
   {
@@ -70,5 +70,37 @@
     "Activité": "Delhaize",
     "Détails": "Delhaize Fort Jaco",
     "Montant": 303.78
+  },
+  {
+    "Date": "2025-10-28",
+    "Qui": "Sika",
+    "Type": "...",
+    "Activité": "...",
+    "Détails": "...",
+    "Montant": 85
+  },
+  {
+    "Date": "2025-10-31",
+    "Qui": "Nevala, Tanuki",
+    "Type": "Vente",
+    "Activité": "Cookies",
+    "Détails": "Dans quartier",
+    "Montant": 113.8
+  },
+  {
+    "Date": "2025-11-01",
+    "Qui": "Bastien, Adrien, Chousingha",
+    "Type": "Vente",
+    "Activité": "Calendriers",
+    "Détails": "Dans quartier",
+    "Montant": [34, 28, 22]
+  },
+  {
+    "Date": "2025-11-01",
+    "Qui": "Groupe",
+    "Type": "Bar Pi",
+    "Activité": "Bar Pi #2",
+    "Détails": "Bonne édition, vla du monde",
+    "Montant": 0
   }
 ]
