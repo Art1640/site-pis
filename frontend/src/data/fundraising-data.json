@@ -51,7 +51,7 @@
     "Date": "2025-10-12",
     "Qui": "Chousingha, Charlotte, Adrien, Bastien, Merione",
     "Type": "Action",
-    "Activité": "Vente de chaussettes",
+    "Activité": "Chaussettes",
     "Détails": "",
     "Montant": [33, 21, 60, 48, 111]
   },
@@ -72,14 +72,6 @@
     "Montant": 303.78
   },
   {
-    "Date": "2025-10-28",
-    "Qui": "Sika",
-    "Type": "...",
-    "Activité": "...",
-    "Détails": "...",
-    "Montant": 85
-  },
-  {
     "Date": "2025-10-31",
     "Qui": "Nevala, Tanuki",
     "Type": "Vente",
@@ -90,7 +82,7 @@
   {
     "Date": "2025-11-01",
     "Qui": "Bastien, Adrien, Chousingha",
-    "Type": "Vente",
+    "Type": "Action",
     "Activité": "Calendriers",
     "Détails": "Dans quartier",
     "Montant": [34, 28, 22]
@@ -102,5 +94,13 @@
     "Activité": "Bar Pi #2",
     "Détails": "Bonne édition, vla du monde",
     "Montant": 0
+  },
+  {
+    "Date": "2025-11-03",
+    "Qui": "Sika",
+    "Type": "Travail perso",
+    "Activité": "Travail perso",
+    "Détails": "Aide maman",
+    "Montant": 85
   }
 ]
