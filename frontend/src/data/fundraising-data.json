@@ -52,7 +52,7 @@
     "Qui": "Chousingha, Charlotte, Adrien, Bastien, Merione",
     "Type": "Action",
     "Activité": "Chaussettes",
-    "Détails": "",
+    "Détails": "Vague 1",
     "Montant": [33, 21, 60, 48, 111]
   },
   {
@@ -103,5 +103,13 @@
     "Activité": "Travail perso",
     "Détails": "Aide maman",
     "Montant": 85
+  },
+  {
+    "Date": "2025-11-14",
+    "Qui": "Nevala, Dorcopsis, Sika, Adrien, Ocicat",
+    "Type": "Action",
+    "Activité": "Chaussettes",
+    "Détails": "Vague 2",
+    "Montant": [48, 45, 33, 12, 117]
   }
 ]
