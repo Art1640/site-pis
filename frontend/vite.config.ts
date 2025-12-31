@@ -19,14 +19,20 @@ export default defineConfig(({ command }) => {
     return isGitHubPages ? '/site-pis/' : '/'
   }
 
-  return {
-    plugins: [react()],
-    base: getBasePath(),
-    server: {
-      port: 3000,
-      host: true
-    },
-    // Fix for Windows OneDrive permission issues
-    cacheDir: './.vite-cache'
-  }
+	  return {
+	    plugins: [react()],
+	    base: getBasePath(),
+	    server: {
+	      port: 3000,
+	      host: true,
+	      // Enable polling so HMR works reliably when the project
+	      // lives on the Windows filesystem (/mnt/c, WSL, network drives, etc.)
+	      watch: {
+	        usePolling: true,
+	        interval: 300,
+	      },
+	    },
+	    // Fix for Windows OneDrive permission issues
+	    cacheDir: './.vite-cache'
+	  }
 })

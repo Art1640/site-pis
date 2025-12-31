@@ -13,17 +13,26 @@ const ObjectifsMensuelsPage: React.FC = () => {
   const loading = recordsLoading || individualLoading
   const error = recordsError || individualError
 
-  // Extract individual names (same logic as AllRecordsPage)
-  const individualNames = useMemo(() => {
-    if (!records) return []
-    // Extract individual names from comma-separated lists, excluding "Groupe"
-    const allNames = records.flatMap(r =>
-      r.Qui.split(',').map(name => name.trim())
-    ).filter(name => name !== 'Groupe')
-    return [...new Set(allNames)].sort()
-  }, [records])
+	// Extract individual names (same logic as AllRecordsPage)
+	const individualNames = useMemo(() => {
+		if (!records) return []
+		// Extract individual names from comma-separated lists, excluding "Groupe"
+		const allNames = records.flatMap(r =>
+		  r.Qui.split(',').map(name => name.trim())
+		).filter(name => name !== 'Groupe')
+		return [...new Set(allNames)].sort()
+	}, [records])
 
-  // Generate months from September 2025 to June 2026 (full academic year)
+	// Order names so that Charlotte & Nathan always appear at the bottom of the
+	// table (they left, but we still show their historical contributions)
+	const orderedIndividualNames = useMemo(() => {
+		const retired = ['Charlotte', 'Nathan']
+		const active = individualNames.filter(name => !retired.includes(name))
+		const retiredPresent = retired.filter(name => individualNames.includes(name))
+		return [...active, ...retiredPresent]
+	}, [individualNames])
+
+	// Generate months from September 2025 to June 2026 (full academic year)
   const months = useMemo(() => {
     const startDate = new Date('2025-09-01')
     const endDate = new Date('2026-06-30')
@@ -92,10 +101,12 @@ const ObjectifsMensuelsPage: React.FC = () => {
         monthAmounts.push({ name, amount })
       })
 
-      if (monthAmounts.length === 0) return
+	    	  if (monthAmounts.length === 0) return
 
-      // Exclude Nathan from ranking calculations
-      const rankingAmounts = monthAmounts.filter(p => p.name !== 'Nathan')
+	    	  // Exclude Charlotte & Nathan from ranking calculations (they left)
+	    	  const rankingAmounts = monthAmounts.filter(
+	    	    p => p.name !== 'Nathan' && p.name !== 'Charlotte'
+	    	  )
 
       if (rankingAmounts.length === 0) return
 
@@ -105,9 +116,9 @@ const ObjectifsMensuelsPage: React.FC = () => {
       const maxAmount = rankingAmounts[0].amount
       const minAmount = rankingAmounts[rankingAmounts.length - 1].amount
 
-      // Get all people with max amount (in case of ties) - excluding Nathan
+	    	  // Get all people with max amount (in case of ties) - excluding retired
       const best = rankingAmounts.filter(p => p.amount === maxAmount && p.amount > 0).map(p => p.name)
-      // Get all people with min amount (in case of ties) - excluding Nathan
+	    	  // Get all people with min amount (in case of ties) - excluding retired
       const worst = rankingAmounts.filter(p => p.amount === minAmount).map(p => p.name)
 
       rankings.set(month.key, { best, worst })
@@ -165,48 +176,69 @@ const ObjectifsMensuelsPage: React.FC = () => {
                 })}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {individualNames.map((name, index) => (
-                <tr key={name} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                  <td className="px-2 md:px-4 py-4 whitespace-nowrap text-xs md:text-sm font-medium text-gray-900 border-r border-gray-200">
-                    {name} {name === 'Nathan' && '💀'}
-                  </td>
-                  {months.map(month => {
-                    const amount = monthlyAmounts.get(name)?.get(month.key) || 0
-                    const currentDate = new Date()
-                    const currentMonthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`
-                    const isFutureMonth = month.key > currentMonthKey
-                    const colorClasses = getAmountColor(amount, isFutureMonth)
+	            <tbody className="bg-white divide-y divide-gray-200">
+	              {orderedIndividualNames.map((name, index) => {
+	                const isRetired = name === 'Charlotte' || name === 'Nathan'
 
-                    // Get ranking emojis for this month
-                    const monthRanking = getMonthlyRankings.get(month.key)
-                    const isBest = monthRanking?.best.includes(name) || false
-                    const isWorst = monthRanking?.worst.includes(name) || false
-                    const isNathan = name === 'Nathan'
+	                return (
+	                  <tr
+	                    key={name}
+	                    className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} ${
+	                      isRetired ? 'opacity-60' : ''
+	                    }`}
+	                  >
+	                    <td
+	                      className={`px-2 md:px-4 py-4 whitespace-nowrap text-xs md:text-sm font-medium border-r border-gray-200 ${
+	                        isRetired ? 'text-gray-400 italic' : 'text-gray-900'
+	                      }`}
+	                    >
+	                      {name} {isRetired && '💀'}
+	                    </td>
+	                    {months.map(month => {
+	                      const amount = monthlyAmounts.get(name)?.get(month.key) || 0
+	                      const currentDate = new Date()
+	                      const currentMonthKey = `${currentDate.getFullYear()}-${String(
+	                        currentDate.getMonth() + 1
+	                      ).padStart(2, '0')}`
+	                      const isFutureMonth = month.key > currentMonthKey
+	                      const colorClasses = getAmountColor(amount, isFutureMonth)
 
-                    return (
-                      <td key={month.label} className={`px-2 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-center border-r border-gray-200 ${isFutureMonth ? 'bg-gray-100 text-gray-400' : 'text-gray-900'}`}>
-                        {isFutureMonth ? (
-                          '-'
-                        ) : (
-                          <div className="relative inline-block">
-                            <span className={`px-2 py-1 rounded-md font-medium ${colorClasses}`}>
-                              {formatCurrency(amount)}
-                            </span>
-                            {!isNathan && isBest && (
-                              <span className="absolute -top-2 -right-2 text-xs z-10">👑</span>
-                            )}
-                            {!isNathan && isWorst && !isBest && (
-                              <span className="absolute -top-2 -right-2 text-xs z-10">💩</span>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
+	                      // Get ranking emojis for this month
+	                      const monthRanking = getMonthlyRankings.get(month.key)
+	                      const isBest = monthRanking?.best.includes(name) || false
+	                      const isWorst = monthRanking?.worst.includes(name) || false
+
+	                      return (
+	                        <td
+	                          key={month.label}
+	                          className={`px-2 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-center border-r border-gray-200 ${
+	                            isFutureMonth ? 'bg-gray-100 text-gray-400' : 'text-gray-900'
+	                          }`}
+	                        >
+	                          {isFutureMonth ? (
+	                            '-'
+	                          ) : (
+	                            <div className="relative inline-block">
+	                              <span
+	                                className={`px-2 py-1 rounded-md font-medium ${colorClasses}`}
+	                              >
+	                                {formatCurrency(amount)}
+	                              </span>
+										{!isRetired && isBest && (
+										  <span className="absolute -top-2 -right-2 text-xs">👑</span>
+										)}
+										{!isRetired && isWorst && !isBest && (
+										  <span className="absolute -top-2 -right-2 text-xs">💩</span>
+										)}
+	                            </div>
+	                          )}
+	                        </td>
+	                      )
+	                    })}
+	                  </tr>
+	                )
+	              })}
+	            </tbody>
           </table>
 
           {individualNames.length === 0 && (

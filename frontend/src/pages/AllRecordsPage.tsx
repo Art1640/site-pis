@@ -310,8 +310,8 @@ const AllRecordsPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredAndSortedRecords.map((record, index) => (
-                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+	              {filteredAndSortedRecords.map((record, index) => (
+	                <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
                   <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                     {formatDate(record.Date)}
                   </td>
@@ -334,19 +334,53 @@ const AllRecordsPage: React.FC = () => {
                     })()}
                   </td>
                   <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
-                    {record.Type}
+		                    {record.Type}
                   </td>
-                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
-                    {record.Activité}
-                  </td>
-                  <td className="px-3 md:px-6 py-4 text-xs md:text-sm text-gray-900 max-w-xs truncate">
-                    {record.Détails}
-                  </td>
+		                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
+		                    {(() => {
+		                      const { truncated, needsTooltip, original } = getTruncatedText(record.Activité, 25)
+
+		                      if (needsTooltip) {
+		                        return (
+		                          <div className="relative group">
+		                            {truncated}
+		                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-pre-line z-10 min-w-max">
+		                              {original}
+		                            </div>
+		                          </div>
+		                        )
+		                      }
+		
+		                      return truncated
+		                    })()}
+		                  </td>
+		                  <td className="px-3 md:px-6 py-4 text-xs md:text-sm text-gray-900 max-w-xs">
+		                    {(() => {
+		                      const { truncated, needsTooltip, original } = getTruncatedText(record.Détails, 40)
+
+		                      if (needsTooltip) {
+		                        return (
+		                          <div className="relative group max-w-xs">
+		                            <span className="block truncate">{truncated}</span>
+		                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-pre-line z-10 min-w-max">
+		                              {original}
+		                            </div>
+		                          </div>
+		                        )
+		                      }
+		
+		                      return <span className="block truncate">{truncated}</span>
+		                    })()}
+		                  </td>
                   <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm font-semibold text-scouts-blue">
                     {isArrayAmount(record.Montant) ? (
                       <div className="relative group">
                         {formatCurrency(getTotalAmount(record.Montant))}
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-pre-line z-10 min-w-max">
+		                        <div
+		                          className={`absolute left-1/2 transform -translate-x-1/2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-pre-line z-20 min-w-max ${
+		                            index < 3 ? 'top-full mt-2' : 'bottom-full mb-2'
+		                          }`}
+		                        >
                           {getAmountTooltip(record.Montant, record.Qui.split(',').map(name => name.trim()))}
                         </div>
                       </div>

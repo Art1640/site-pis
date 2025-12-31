@@ -8,7 +8,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const CORRECT_PASSWORD = 'Sapins!'
+const CORRECT_PASSWORD = 'Souslik:)'
 const AUTH_STORAGE_KEY = 'pissenlits_auth'
 
 interface AuthProviderProps {

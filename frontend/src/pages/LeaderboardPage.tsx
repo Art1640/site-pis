@@ -1,14 +1,15 @@
 import React from 'react'
 import { Bar } from 'react-chartjs-2'
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Title,
+	Tooltip,
+	Legend,
 } from 'chart.js'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { useSummary } from '../hooks/useData'
 import { formatCurrency } from '../utils/formatters'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -16,12 +17,13 @@ import ErrorMessage from '../components/ErrorMessage'
 import { useRefresh } from '../contexts/RefreshContext'
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Title,
+	Tooltip,
+	Legend,
+	ChartDataLabels
 )
 
 const LeaderboardPage: React.FC = () => {
@@ -63,8 +65,10 @@ const LeaderboardPage: React.FC = () => {
     null               // Empty right
   ] : []
 
-  const chartData = {
-    labels: sortedContributors.map(([name]) => name),
+	const chartData = {
+		labels: sortedContributors.map(([name]) =>
+			name === 'Charlotte' || name === 'Nathan' ? `${name} 💀` : name
+		),
     datasets: [
       {
         label: 'Montant collecté (€)',
@@ -104,66 +108,84 @@ const LeaderboardPage: React.FC = () => {
     ],
   }
 
-  const chartOptions = {
-    indexAxis: 'y' as const,
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      intersect: false,
-      mode: 'index' as const,
-    },
-    hover: {
-      mode: null as any,
-    },
-    layout: {
-      padding: {
-        top: 10,
-        bottom: 10,
-        left: 10,
-        right: 10
-      }
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        enabled: false
-      },
-      datalabels: {
-        display: true,
-        color: '#ffffff',
-        font: {
-          weight: 'bold' as const,
-          size: 12
-        },
-        anchor: 'center' as const,
-        align: 'center' as const,
-        formatter: function(value: any) {
-          return value.toFixed(2)
-        }
-      }
-    },
-    scales: {
-      x: {
-        display: false, // Hide the x-axis since we show it separately
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
-        }
-      },
-      y: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          font: {
-            size: 14
-          }
-        }
-      },
-    },
-  }
+	const chartOptions = {
+		indexAxis: 'y' as const,
+		responsive: true,
+		maintainAspectRatio: false,
+		interaction: {
+			intersect: false,
+			mode: 'index' as const,
+		},
+		hover: {
+			mode: null as any,
+		},
+		layout: {
+			padding: {
+				top: 10,
+				bottom: 10,
+				left: 10,
+				right: 60,
+			},
+		},
+		plugins: {
+			legend: {
+				display: false,
+			},
+			tooltip: {
+				enabled: false,
+			},
+			datalabels: {
+				display: true,
+				color: (context: any) => {
+					const value = context.dataset.data[context.dataIndex] as number
+					const data = context.dataset.data as number[]
+					const max = Math.max(...data)
+					const isSmall = max > 0 && value < max * 0.12
+					return isSmall ? '#000000' : '#ffffff'
+				},
+				font: {
+					weight: 'bold' as const,
+					size: 12,
+				},
+				anchor: (context: any) => {
+					const value = context.dataset.data[context.dataIndex] as number
+					const data = context.dataset.data as number[]
+					const max = Math.max(...data)
+					const isSmall = max > 0 && value < max * 0.12
+					return (isSmall ? 'end' : 'center') as any
+				},
+				align: (context: any) => {
+					const value = context.dataset.data[context.dataIndex] as number
+					const data = context.dataset.data as number[]
+					const max = Math.max(...data)
+					const isSmall = max > 0 && value < max * 0.12
+					return (isSmall ? 'right' : 'center') as any
+				},
+				formatter: function (value: any) {
+					return value.toFixed(2)
+				},
+			},
+		},
+		scales: {
+			x: {
+				display: false, // Hide the x-axis since we show it separately
+				beginAtZero: true,
+				grid: {
+					color: 'rgba(0, 0, 0, 0.1)',
+				},
+			},
+			y: {
+				grid: {
+					display: false,
+				},
+				ticks: {
+					font: {
+						size: 14,
+					},
+				},
+			},
+		},
+	}
 
   const getPodiumPosition = (index: number) => {
     const positions = ['🥇', '🥈', '🥉']
@@ -200,20 +222,22 @@ const LeaderboardPage: React.FC = () => {
                 const actualRank = index === 0 ? 2 : index === 1 ? 1 : 3
                 const displayPosition = index === 0 ? 1 : index === 1 ? 0 : 2 // For styling (2nd, 1st, 3rd)
 
-                return (
-                  <div key={name} className="text-center">
-                    <div className="text-3xl md:text-5xl mb-2 md:mb-4">{getPodiumPosition(displayPosition)}</div>
-                    <div className={`bg-gradient-to-t ${
-                      actualRank === 1 ? 'from-yellow-400 to-yellow-300' :
-                      actualRank === 2 ? 'from-gray-400 to-gray-300' :
-                      'from-orange-400 to-orange-300'
-                    } ${getPodiumHeight(displayPosition)} w-20 md:w-28 rounded-t-lg flex items-end justify-center pb-2 md:pb-3`}>
-                      <div className="text-white font-bold text-sm md:text-lg">{actualRank}</div>
-                    </div>
-                    <div className="mt-2 md:mt-3 font-semibold text-scouts-blue text-sm md:text-lg">{name}</div>
-                    <div className="text-xs md:text-sm text-gray-600">{formatCurrency(amount)}</div>
-                  </div>
-                )
+					return (
+						<div key={name} className="text-center">
+							<div className="text-3xl md:text-5xl mb-2 md:mb-4">{getPodiumPosition(displayPosition)}</div>
+							<div className={`bg-gradient-to-t ${
+								actualRank === 1 ? 'from-yellow-400 to-yellow-300' :
+								actualRank === 2 ? 'from-gray-400 to-gray-300' :
+								'from-orange-400 to-orange-300'
+							} ${getPodiumHeight(displayPosition)} w-20 md:w-28 rounded-t-lg flex items-end justify-center pb-2 md:pb-3`}>
+								<div className="text-white font-bold text-sm md:text-lg">{actualRank}</div>
+							</div>
+							<div className="mt-2 md:mt-3 font-semibold text-scouts-blue text-sm md:text-lg">
+								{name} {(name === 'Charlotte' || name === 'Nathan') && '💀'}
+							</div>
+							<div className="text-xs md:text-sm text-gray-600">{formatCurrency(amount)}</div>
+						</div>
+					)
               })}
             </div>
           </div>

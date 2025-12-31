@@ -1,6 +1,6 @@
 [
   {
-    "Date": "2025-09-18",
+    "Date": "2025-09-19",
     "Qui": "Groupe",
     "Type": "Bar Pi",
     "Activité": "Bar Pi #1",
@@ -9,7 +9,7 @@
   },
   {
     "Date": "2025-09-20",
-    "Qui": "Occicat",
+    "Qui": "Ocicat",
     "Type": "Vente",
     "Activité": "Cookies",
     "Détails": "Dans quartier",
@@ -57,7 +57,7 @@
   },
   {
     "Date": "2025-10-12",
-    "Qui": "Chousingha, Charlotte, Adrien, Bastien, Merione",
+    "Qui": "Chousingha, Charlotte, Adrien, Taguan, Merione",
     "Type": "Action",
     "Activité": "Chaussettes",
     "Détails": "Vague 1",
@@ -65,7 +65,7 @@
   },
   {
     "Date": "2025-10-18",
-    "Qui": "Viktor, Bastien, Adrien",
+    "Qui": "Viktor, Taguan, Adrien",
     "Type": "Caisses",
     "Activité": "Grande Epicerie",
     "Détails": "Grande Epicerie Fort Jaco",
@@ -89,7 +89,7 @@
   },
   {
     "Date": "2025-11-01",
-    "Qui": "Bastien, Adrien, Chousingha",
+    "Qui": "Taguan, Adrien, Chousingha",
     "Type": "Action",
     "Activité": "Calendriers",
     "Détails": "Dans quartier",
@@ -117,7 +117,39 @@
     "Qui": "Nevala, Dorcopsis, Sika, Adrien, Ocicat",
     "Type": "Action",
     "Activité": "Chaussettes",
-    "Détails": "Vague 2",
-    "Montant": [48, 45, 33, 12, 117]
+    "Détails": "Vague 2 & 3",
+    "Montant": [48, 45, 33, 12, 330]
+  },
+  {
+    "Date": "2025-11-15",
+    "Qui": "Sika, Dorcopsis",
+    "Type": "Caisses",
+    "Activité": "Delhaize",
+    "Détails": "Delhaize Fort Jaco",
+    "Montant": [0, 0]
+  },
+  {
+    "Date": "2025-11-16",
+    "Qui": "Chousingha, Nevala",
+    "Type": "Caisses",
+    "Activité": "Delhaize",
+    "Détails": "Delhaize Fort Jaco",
+    "Montant": [80, 0]
+  },
+  {
+    "Date": "2025-12-07",
+    "Qui": "Groupe, Taguan, Charlotte, Dorcopsis, Chousingha, Merione, Ocicat, Tanuki, Viktor",
+    "Type": "Action",
+    "Activité": "Sapins",
+    "Détails": "",
+    "Montant": [1223, 30, 15, 15, 15, 75, 30, 45, 120]
+  },
+  {
+    "Date": "2025-12-31",
+    "Qui": "Groupe",
+    "Type": "Action",
+    "Activité": "Vin",
+    "Détails": "",
+    "Montant": [0]
   }
 ]

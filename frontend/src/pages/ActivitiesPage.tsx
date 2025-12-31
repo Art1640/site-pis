@@ -124,10 +124,19 @@ const ActivitiesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Details Table Section */}
-        <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[400px] lg:h-full overflow-hidden">
-          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-8">Détails par type</h3>
-          <div className="flex-1 overflow-y-auto overflow-x-auto" style={{ scrollBehavior: 'smooth', maxHeight: '350px' }}>
+	        {/* Details Table Section */}
+	        <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[400px] lg:h-full overflow-hidden">
+	          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-8">Détails par type</h3>
+	          {/*
+	            On mobile: keep a max height so the card doesn't become too tall.
+	            On desktop (lg+): remove the max height so the table can use the full
+	            height of the card instead of having an inner scrollbar in the
+	            middle of the card.
+	          */}
+	          <div
+	            className="flex-1 overflow-y-auto overflow-x-auto max-h-[350px] lg:max-h-none"
+	            style={{ scrollBehavior: 'smooth' }}
+	          >
             <table className="min-w-full table-auto">
               <thead className="sticky top-0 bg-white z-10">
                 <tr className="bg-scouts-blue text-white">
