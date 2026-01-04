@@ -80,6 +80,14 @@
     "Montant": 303.78
   },
   {
+    "Date": "2025-10-24",
+    "Qui": "Merione",
+    "Type": "Travail perso",
+    "Activité": "Travail perso",
+    "Détails": "Aide Tatie Crouton",
+    "Montant": 100
+  },
+  {
     "Date": "2025-10-31",
     "Qui": "Nevala, Tanuki",
     "Type": "Vente",
@@ -89,11 +97,11 @@
   },
   {
     "Date": "2025-11-01",
-    "Qui": "Taguan, Adrien, Chousingha",
+    "Qui": "Taguan, Adrien, Chousingha, Merione, Dorcopsis",
     "Type": "Action",
     "Activité": "Calendriers",
-    "Détails": "Dans quartier",
-    "Montant": [34, 28, 22]
+    "Détails": "",
+    "Montant": [34, 28, 22, 15, 12]
   },
   {
     "Date": "2025-11-01",
@@ -113,11 +121,19 @@
     "Montant": 85
   },
   {
+    "Date": "2025-11-08",
+    "Qui": "Merione, Tanuki",
+    "Type": "Caisses",
+    "Activité": "Grande Epicerie",
+    "Détails": "Grande Epicerie Fort Jaco",
+    "Montant": 157.20
+  },
+  {
     "Date": "2025-11-14",
     "Qui": "Nevala, Dorcopsis, Sika, Adrien, Ocicat",
     "Type": "Action",
     "Activité": "Chaussettes",
-    "Détails": "Vague 2 & 3",
+    "Détails": "Vagues 2 & 3",
     "Montant": [48, 45, 33, 12, 330]
   },
   {
@@ -126,7 +142,7 @@
     "Type": "Caisses",
     "Activité": "Delhaize",
     "Détails": "Delhaize Fort Jaco",
-    "Montant": [0, 0]
+    "Montant": 137.2
   },
   {
     "Date": "2025-11-16",
@@ -134,7 +150,15 @@
     "Type": "Caisses",
     "Activité": "Delhaize",
     "Détails": "Delhaize Fort Jaco",
-    "Montant": [80, 0]
+    "Montant": [80, 99.80]
+  },
+  {
+    "Date": "2025-12-05",
+    "Qui": "Sika",
+    "Type": "Travail perso",
+    "Activité": "Travail perso",
+    "Détails": "Aide maman",
+    "Montant": 69.7
   },
   {
     "Date": "2025-12-07",
@@ -142,7 +166,55 @@
     "Type": "Action",
     "Activité": "Sapins",
     "Détails": "",
-    "Montant": [1223, 30, 15, 15, 15, 75, 30, 45, 120]
+    "Montant": [1143, 30, 15, 15, 15, 75, 60, 45, 120]
+  },
+  {
+    "Date": "2025-12-21",
+    "Qui": "Nevala, Merione",
+    "Type": "Vente",
+    "Activité": "Cookies",
+    "Détails": "Magasin vin",
+    "Montant": [100, 102.5]
+  },
+  {
+    "Date": "2025-12-21",
+    "Qui": "Tanuki, Chousingha, Taguan, Dorcopsis",
+    "Type": "Caisses",
+    "Activité": "Carrefour",
+    "Détails": "Carrefour Waterloo",
+    "Montant": [35, 56.8, 56.8, 56.8]
+  },
+  {
+    "Date": "2025-12-23",
+    "Qui": "Dorcopsis, Tanuki",
+    "Type": "Caisses",
+    "Activité": "Carrefour",
+    "Détails": "Carrefour Waterloo",
+    "Montant": [63.4, 30]
+  },
+  {
+    "Date": "2025-12-24",
+    "Qui": "Adrien, Taguan",
+    "Type": "Caisses",
+    "Activité": "Carrefour",
+    "Détails": "Carrefour Waterloo",
+    "Montant": 163
+  },
+  {
+    "Date": "2025-12-27",
+    "Qui": "Merione, Tanuki",
+    "Type": "Caisses",
+    "Activité": "Grande Epicerie",
+    "Détails": "Grande Epicerie Fort Jaco",
+    "Montant": 170
+  },
+  {
+    "Date": "2025-12-30",
+    "Qui": "Chousingha, Tanuki",
+    "Type": "Caisses",
+    "Activité": "Grande Epicerie",
+    "Détails": "Grande Epicerie Fort Jaco",
+    "Montant": [175.20, 56.60]
   },
   {
     "Date": "2025-12-31",
