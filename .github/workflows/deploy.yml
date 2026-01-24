@@ -39,6 +39,9 @@ jobs:
         npm ci
 
     - name: Build
+      env:
+        VITE_USE_BACKEND: true
+        VITE_API_URL: https://site-pis.onrender.com
       run: |
         cd frontend
         npm run build
