@@ -93,9 +93,18 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
   const activity_totals: { [key: string]: number } = {}
   const activity_counts: { [key: string]: number } = {}
   individualRecords.forEach(record => {
-    const activity = record.Type
+    const activity = record.Activité
     activity_totals[activity] = (activity_totals[activity] || 0) + record.Montant
     activity_counts[activity] = (activity_counts[activity] || 0) + 1
+  })
+
+  // Group by type
+  const type_totals: { [key: string]: number } = {}
+  const type_counts: { [key: string]: number } = {}
+  individualRecords.forEach(record => {
+    const type = record.Type
+    type_totals[type] = (type_totals[type] || 0) + record.Montant
+    type_counts[type] = (type_counts[type] || 0) + 1
   })
 
   // Calculate cumulative data by date
@@ -119,6 +128,8 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
     person_totals,
     activity_totals,
     activity_counts,
+    type_totals,
+    type_counts,
     cumulative_data
   }
 }
@@ -203,6 +214,21 @@ export const backendApiService = {
   async resetData(): Promise<void> {
     // Not implemented for backend - would need admin endpoint
     throw new Error('Reset data not available with backend API')
+  },
+
+  exportData(): string {
+    // For backend mode, we need to fetch the data first
+    throw new Error('Use getRecords() to fetch data, then export manually')
+  },
+
+  importData(_jsonString: string): void {
+    // Not implemented for backend - would need admin endpoint
+    throw new Error('Import data not available with backend API')
+  },
+
+  clearAllData(): void {
+    // Not implemented for backend - would need admin endpoint
+    throw new Error('Clear all data not available with backend API')
   }
 }
 

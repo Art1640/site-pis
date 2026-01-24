@@ -22,7 +22,14 @@ if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///fundraising.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+print(f"🔧 Initializing database with URI: {app.config['SQLALCHEMY_DATABASE_URI'][:50]}...")
+
+try:
+    db = SQLAlchemy(app)
+    print("✅ SQLAlchemy initialized successfully")
+except Exception as e:
+    print(f"❌ Error initializing SQLAlchemy: {e}")
+    raise
 
 # Database Model
 class FundraisingRecord(db.Model):
@@ -157,9 +164,14 @@ def health_check():
 
 def init_db():
     """Initialize the database"""
-    with app.app_context():
-        db.create_all()
-        print("✅ Database tables created successfully!")
+    try:
+        with app.app_context():
+            db.create_all()
+            print("✅ Database tables created successfully!")
+    except Exception as e:
+        print(f"❌ Error creating database tables: {e}")
+        print(f"📊 Database URI: {app.config['SQLALCHEMY_DATABASE_URI'][:50]}...")
+        raise
 
 if __name__ == '__main__':
     # Initialize database
