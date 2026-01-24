@@ -1,0 +1,24 @@
+services:
+  # Backend API Service
+  - type: web
+    name: pissenlits-backend
+    env: python
+    region: frankfurt  # Choose region closest to you
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && python app.py"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pissenlits-db
+          property: connectionString
+    healthCheckPath: /api/health
+
+databases:
+  # PostgreSQL Database
+  - name: pissenlits-db
+    databaseName: fundraising
+    user: fundraising_user
+    region: frankfurt  # Same region as backend
+

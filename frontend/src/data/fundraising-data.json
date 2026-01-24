@@ -223,5 +223,13 @@
     "Activité": "Vin",
     "Détails": "",
     "Montant": [151.27, 13.06, 52.1, 8.51, 48.72]
+  },
+  {
+    "Date": "2026-01-31",
+    "Qui": "Dorcopsis",
+    "Type": "Vente",
+    "Activité": "Lasagnes",
+    "Détails": "",
+    "Montant": 42
   }
 ]

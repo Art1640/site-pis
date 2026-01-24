@@ -1,14 +1,19 @@
 import pytest
 import json
 import os
-from app import app, load_data, save_data
+from app import app, db, FundraisingRecord
 
 @pytest.fixture
 def client():
     """Create a test client for the Flask app."""
+    # Use in-memory SQLite for testing
     app.config['TESTING'] = True
-    with app.test_client() as client:
-        yield client
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+
+    with app.app_context():
+        db.create_all()
+        yield app.test_client()
+        db.drop_all()
 
 @pytest.fixture
 def sample_data():
@@ -16,128 +21,150 @@ def sample_data():
     return [
         {
             "Date": "2025-09-01",
-            "Nom": "Test User",
+            "Qui": "Test User",
+            "Type": "Test Type",
             "Activité": "Test Activity",
             "Détails": "Test details",
-            "Montant": 100.0,
-            "Qui": "Test Responsible"
+            "Montant": 100.0
         },
         {
             "Date": "2025-09-02",
-            "Nom": "Test User 2",
+            "Qui": "Test User 2",
+            "Type": "Test Type 2",
             "Activité": "Test Activity 2",
             "Détails": "Test details 2",
-            "Montant": 150.0,
-            "Qui": "Test Responsible 2"
+            "Montant": 150.0
         }
     ]
 
-def test_get_records(client, sample_data, tmp_path):
-    """Test the /api/records endpoint."""
-    # Create a temporary data file
-    test_data_file = tmp_path / "test_data.json"
-    with open(test_data_file, 'w', encoding='utf-8') as f:
-        json.dump(sample_data, f, ensure_ascii=False, indent=2)
-    
-    # Temporarily replace the data file
-    original_data_file = app.config.get('DATA_FILE', 'data.json')
-    app.config['DATA_FILE'] = str(test_data_file)
-    
-    try:
-        response = client.get('/api/records')
-        assert response.status_code == 200
-        
-        data = response.get_json()
-        assert len(data) == 2
-        assert data[0]['Nom'] == 'Test User'
-        assert data[1]['Montant'] == 150.0
-    finally:
-        app.config['DATA_FILE'] = original_data_file
+@pytest.fixture
+def populated_db(client, sample_data):
+    """Populate the test database with sample data."""
+    with app.app_context():
+        for data in sample_data:
+            record = FundraisingRecord.from_dict(data)
+            db.session.add(record)
+        db.session.commit()
 
-def test_get_summary(client, sample_data, tmp_path):
-    """Test the /api/summary endpoint."""
-    # Create a temporary data file
-    test_data_file = tmp_path / "test_data.json"
-    with open(test_data_file, 'w', encoding='utf-8') as f:
-        json.dump(sample_data, f, ensure_ascii=False, indent=2)
-    
-    # Temporarily replace the data file
-    original_data_file = app.config.get('DATA_FILE', 'data.json')
-    app.config['DATA_FILE'] = str(test_data_file)
-    
-    try:
-        response = client.get('/api/summary')
-        assert response.status_code == 200
-        
-        data = response.get_json()
-        assert 'total_funds' in data
-        assert 'person_totals' in data
-        assert 'activity_totals' in data
-        assert 'activity_counts' in data
-        assert 'cumulative_data' in data
-        
-        assert data['total_funds'] == 250.0
-        assert data['person_totals']['Test User'] == 100.0
-        assert data['person_totals']['Test User 2'] == 150.0
-        assert data['activity_totals']['Test Activity'] == 100.0
-        assert data['activity_counts']['Test Activity'] == 1
-        
-        # Check cumulative data
-        assert len(data['cumulative_data']) == 2
-        assert data['cumulative_data'][0]['total'] == 100.0
-        assert data['cumulative_data'][1]['total'] == 250.0
-    finally:
-        app.config['DATA_FILE'] = original_data_file
+def test_get_records_empty(client):
+    """Test the /api/records endpoint with empty database."""
+    response = client.get('/api/records')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data == []
 
-def test_load_data_file_not_exists():
-    """Test load_data when file doesn't exist."""
-    # Temporarily set a non-existent file
-    original_data_file = 'data.json'
-    import app as app_module
-    app_module.DATA_FILE = 'non_existent_file.json'
-    
-    try:
-        data = load_data()
-        assert data == []
-    finally:
-        app_module.DATA_FILE = original_data_file
+def test_get_records(client, populated_db):
+    """Test the /api/records endpoint with data."""
+    response = client.get('/api/records')
+    assert response.status_code == 200
 
-def test_save_and_load_data(tmp_path):
-    """Test saving and loading data."""
-    test_data = [
-        {
-            "Date": "2025-09-01",
-            "Nom": "Test User",
-            "Activité": "Test Activity",
-            "Détails": "Test details",
-            "Montant": 100.0,
-            "Qui": "Test Responsible"
-        }
-    ]
-    
-    test_file = tmp_path / "test_save.json"
-    
-    # Temporarily replace the data file
-    import app as app_module
-    original_data_file = app_module.DATA_FILE
-    app_module.DATA_FILE = str(test_file)
-    
-    try:
-        # Test saving
-        result = save_data(test_data)
-        assert result is True
-        assert test_file.exists()
-        
-        # Test loading
-        loaded_data = load_data()
-        assert loaded_data == test_data
-    finally:
-        app_module.DATA_FILE = original_data_file
+    data = response.get_json()
+    assert len(data) == 2
+    assert data[0]['Qui'] == 'Test User'
+    assert data[1]['Montant'] == 150.0
+
+def test_add_record(client):
+    """Test adding a new record."""
+    new_record = {
+        "Date": "2025-09-03",
+        "Qui": "New User",
+        "Type": "New Type",
+        "Activité": "New Activity",
+        "Détails": "New details",
+        "Montant": 200.0
+    }
+
+    response = client.post('/api/records',
+                          data=json.dumps(new_record),
+                          content_type='application/json')
+    assert response.status_code == 201
+
+    data = response.get_json()
+    assert data['Qui'] == 'New User'
+    assert data['Montant'] == 200.0
+
+def test_delete_record(client, populated_db):
+    """Test deleting a record."""
+    delete_data = {
+        "Date": "2025-09-01",
+        "Qui": "Test User",
+        "Activité": "Test Activity"
+    }
+
+    response = client.post('/api/records/delete',
+                          data=json.dumps(delete_data),
+                          content_type='application/json')
+    assert response.status_code == 200
+
+    # Verify record was deleted
+    response = client.get('/api/records')
+    data = response.get_json()
+    assert len(data) == 1
+    assert data[0]['Qui'] == 'Test User 2'
+
+def test_health_check(client):
+    """Test the health check endpoint."""
+    response = client.get('/api/health')
+    assert response.status_code == 200
+
+    data = response.get_json()
+    assert data['status'] == 'healthy'
+    assert data['database'] == 'connected'
 
 def test_cors_headers(client):
     """Test that CORS headers are present."""
     response = client.get('/api/records')
     assert 'Access-Control-Allow-Origin' in response.headers
+
+def test_record_to_dict():
+    """Test FundraisingRecord.to_dict() method."""
+    with app.app_context():
+        record = FundraisingRecord(
+            date='2025-09-01',
+            qui='Test User',
+            type='Test Type',
+            activite='Test Activity',
+            details='Test details',
+            montant='100.0'
+        )
+
+        result = record.to_dict()
+        assert result['Date'] == '2025-09-01'
+        assert result['Qui'] == 'Test User'
+        assert result['Montant'] == 100.0
+
+def test_record_from_dict():
+    """Test FundraisingRecord.from_dict() method."""
+    data = {
+        "Date": "2025-09-01",
+        "Qui": "Test User",
+        "Type": "Test Type",
+        "Activité": "Test Activity",
+        "Détails": "Test details",
+        "Montant": 100.0
+    }
+
+    record = FundraisingRecord.from_dict(data)
+    assert record.date == '2025-09-01'
+    assert record.qui == 'Test User'
+    assert record.montant == '100.0'
+
+def test_record_with_array_montant():
+    """Test handling of array montant values."""
+    data = {
+        "Date": "2025-09-01",
+        "Qui": "Test User",
+        "Type": "Test Type",
+        "Activité": "Test Activity",
+        "Détails": "Test details",
+        "Montant": [50.0, 30.0, 20.0]
+    }
+
+    record = FundraisingRecord.from_dict(data)
+    assert record.montant == '[50.0, 30.0, 20.0]'
+
+    result = record.to_dict()
+    assert result['Montant'] == [50.0, 30.0, 20.0]
 
 if __name__ == '__main__':
     pytest.main([__file__])

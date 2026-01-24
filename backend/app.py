@@ -1,127 +1,175 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 import json
 import os
-from datetime import datetime, date
-import socket
+from datetime import datetime
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Configuration
-DATA_FILE = 'data.json'
+# Database Configuration
+# Use PostgreSQL in production (Render), SQLite for local development
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+    # Render uses postgres:// but SQLAlchemy needs postgresql://
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
 
-def load_data():
-    """Load data from JSON file"""
-    try:
-        if os.path.exists(DATA_FILE):
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///fundraising.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# Database Model
+class FundraisingRecord(db.Model):
+    __tablename__ = 'fundraising_records'
+
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(10), nullable=False)  # YYYY-MM-DD format
+    qui = db.Column(db.String(500), nullable=False)  # Can have multiple names
+    type = db.Column(db.String(100), nullable=False)
+    activite = db.Column(db.String(200), nullable=False)
+    details = db.Column(db.Text, default='')
+    montant = db.Column(db.Text, nullable=False)  # Store as JSON string (can be number or array)
+
+    def to_dict(self):
+        """Convert database record to dictionary matching frontend format"""
+        # Parse montant - it can be a number or an array
+        try:
+            montant_parsed = json.loads(self.montant)
+        except (json.JSONDecodeError, TypeError):
+            # If it's already a number, use it directly
+            montant_parsed = float(self.montant) if self.montant else 0
+
+        return {
+            'Date': self.date,
+            'Qui': self.qui,
+            'Type': self.type,
+            'Activité': self.activite,
+            'Détails': self.details,
+            'Montant': montant_parsed
+        }
+
+    @staticmethod
+    def from_dict(data):
+        """Create database record from dictionary"""
+        # Convert montant to JSON string if it's an array, otherwise store as string
+        montant = data.get('Montant', 0)
+        if isinstance(montant, list):
+            montant_str = json.dumps(montant)
         else:
-            return []
-    except Exception as e:
-        print(f"Error loading data: {e}")
-        return []
+            montant_str = str(montant)
 
-def save_data(data):
-    """Save data to JSON file"""
-    try:
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        return True
-    except Exception as e:
-        print(f"Error saving data: {e}")
-        return False
+        return FundraisingRecord(
+            date=data.get('Date', ''),
+            qui=data.get('Qui', ''),
+            type=data.get('Type', ''),
+            activite=data.get('Activité', ''),
+            details=data.get('Détails', ''),
+            montant=montant_str
+        )
 
 @app.route('/api/records', methods=['GET'])
 def get_records():
     """Get all fundraising records"""
     try:
-        data = load_data()
-        return jsonify(data)
+        records = FundraisingRecord.query.all()
+        return jsonify([record.to_dict() for record in records])
     except Exception as e:
+        print(f"Error retrieving records: {e}")
         return jsonify({'error': 'Failed to retrieve records'}), 500
 
-@app.route('/api/summary', methods=['GET'])
-def get_summary():
-    """Get aggregated data for charts"""
+@app.route('/api/records', methods=['POST'])
+def add_record():
+    """Add a new fundraising record"""
     try:
-        data = load_data()
-        
-        # Calculate total funds
-        total_funds = sum(record['Montant'] for record in data)
-        
-        # Group by person for leaderboard
-        person_totals = {}
-        for record in data:
-            person = record['Nom']
-            if person in person_totals:
-                person_totals[person] += record['Montant']
-            else:
-                person_totals[person] = record['Montant']
-        
-        # Group by activity
-        activity_totals = {}
-        activity_counts = {}
-        for record in data:
-            activity = record['Activité']
-            if activity in activity_totals:
-                activity_totals[activity] += record['Montant']
-                activity_counts[activity] += 1
-            else:
-                activity_totals[activity] = record['Montant']
-                activity_counts[activity] = 1
-        
-        # Calculate cumulative data by date
-        sorted_data = sorted(data, key=lambda x: x['Date'])
-        cumulative_data = []
-        running_total = 0
-        
-        for record in sorted_data:
-            running_total += record['Montant']
-            cumulative_data.append({
-                'date': record['Date'],
-                'total': running_total
-            })
-        
-        return jsonify({
-            'total_funds': total_funds,
-            'person_totals': person_totals,
-            'activity_totals': activity_totals,
-            'activity_counts': activity_counts,
-            'cumulative_data': cumulative_data
-        })
+        data = request.get_json()
+        new_record = FundraisingRecord.from_dict(data)
+        db.session.add(new_record)
+        db.session.commit()
+        return jsonify(new_record.to_dict()), 201
     except Exception as e:
-        return jsonify({'error': 'Failed to generate summary'}), 500
+        db.session.rollback()
+        print(f"Error adding record: {e}")
+        return jsonify({'error': 'Failed to add record'}), 500
 
-def check_port(port):
-    """Check if a port is available"""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex(('localhost', port))
-    sock.close()
-    return result != 0
+@app.route('/api/records/<int:record_id>', methods=['PUT'])
+def update_record(record_id):
+    """Update an existing fundraising record"""
+    try:
+        record = FundraisingRecord.query.get_or_404(record_id)
+        data = request.get_json()
 
-def find_available_port(start_port=5000):
-    """Find an available port starting from start_port"""
-    port = start_port
-    while port < start_port + 100:  # Check up to 100 ports
-        if check_port(port):
-            return port
-        port += 1
-    return None
+        record.date = data.get('Date', record.date)
+        record.qui = data.get('Qui', record.qui)
+        record.type = data.get('Type', record.type)
+        record.activite = data.get('Activité', record.activite)
+        record.details = data.get('Détails', record.details)
+
+        montant = data.get('Montant', record.montant)
+        if isinstance(montant, list):
+            record.montant = json.dumps(montant)
+        else:
+            record.montant = str(montant)
+
+        db.session.commit()
+        return jsonify(record.to_dict())
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating record: {e}")
+        return jsonify({'error': 'Failed to update record'}), 500
+
+@app.route('/api/records/delete', methods=['POST'])
+def delete_record():
+    """Delete a fundraising record by matching Date, Qui, and Activité"""
+    try:
+        data = request.get_json()
+        date = data.get('Date')
+        qui = data.get('Qui')
+        activite = data.get('Activité')
+
+        # Find and delete the matching record
+        record = FundraisingRecord.query.filter_by(
+            date=date,
+            qui=qui,
+            activite=activite
+        ).first()
+
+        if record:
+            db.session.delete(record)
+            db.session.commit()
+            return jsonify({'message': 'Record deleted successfully'})
+        else:
+            return jsonify({'error': 'Record not found'}), 404
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting record: {e}")
+        return jsonify({'error': 'Failed to delete record'}), 500
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({'status': 'healthy', 'database': 'connected'})
+
+def init_db():
+    """Initialize the database"""
+    with app.app_context():
+        db.create_all()
+        print("✅ Database tables created successfully!")
 
 if __name__ == '__main__':
-    # Check if data file exists, if not create it with sample data
-    if not os.path.exists(DATA_FILE):
-        print("Creating sample data file...")
-        # This will be populated in the next step
-        save_data([])
-    
-    # Find available port
-    port = find_available_port(5000)
-    if port is None:
-        print("No available ports found!")
-        exit(1)
-    
-    print(f"Backend running on http://localhost:{port}")
-    app.run(debug=True, host='0.0.0.0', port=port)
+    # Initialize database
+    init_db()
+
+    # Get port from environment variable (for Render) or use 5000
+    port = int(os.getenv('PORT', 5000))
+
+    print(f"🚀 Backend running on http://localhost:{port}")
+    print(f"📊 Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+
+    # Run the app
+    app.run(debug=os.getenv('FLASK_ENV') == 'development', host='0.0.0.0', port=port)

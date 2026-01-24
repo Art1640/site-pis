@@ -1,7 +1,13 @@
 import { FundraisingRecord, SummaryData } from '../types'
 import initialData from '../data/fundraising-data.json'
+import { backendApiService } from './backendApi'
 
 const STORAGE_KEY = 'pissenlits-fundraising-data'
+
+// Check if we should use backend API
+const USE_BACKEND = import.meta.env.VITE_USE_BACKEND === 'true'
+
+console.log('🔧 API Mode:', USE_BACKEND ? 'Backend API' : 'localStorage')
 
 // Import data from JSON file - easier to maintain
 const INITIAL_DATA: FundraisingRecord[] = initialData
@@ -180,10 +186,10 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
   }
 }
 
-export const apiService = {
+// Local storage implementation
+const localStorageService = {
   async getRecords(): Promise<FundraisingRecord[]> {
     try {
-      // Simulate async operation
       await new Promise(resolve => setTimeout(resolve, 100))
       return loadFromStorage()
     } catch (error) {
@@ -194,7 +200,6 @@ export const apiService = {
 
   async getIndividualRecords(): Promise<IndividualRecord[]> {
     try {
-      // Simulate async operation
       await new Promise(resolve => setTimeout(resolve, 100))
       const records = loadFromStorage()
       return splitRecordsForIndividuals(records)
@@ -206,7 +211,6 @@ export const apiService = {
 
   async getSummary(): Promise<SummaryData> {
     try {
-      // Simulate async operation
       await new Promise(resolve => setTimeout(resolve, 100))
       const records = loadFromStorage()
       return calculateSummary(records)
@@ -287,5 +291,8 @@ export const apiService = {
     sessionStorage.removeItem(STORAGE_KEY)
   }
 }
+
+// Export the appropriate service based on configuration
+export const apiService = USE_BACKEND ? backendApiService : localStorageService
 
 export default apiService
