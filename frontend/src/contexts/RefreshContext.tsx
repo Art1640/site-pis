@@ -20,13 +20,18 @@ export const RefreshProvider: React.FC<RefreshProviderProps> = ({ children }) =>
   const refreshData = async () => {
     try {
       setIsRefreshing(true)
-      
-      // Clear sessionStorage to force fresh data load
-      apiService.clearAllData()
-      
+
+      // Clear sessionStorage to force fresh data load (only works in localStorage mode)
+      try {
+        apiService.clearAllData()
+      } catch (error) {
+        // clearAllData not supported in backend mode - that's OK
+        console.log('Clear all data not supported in current mode')
+      }
+
       // Trigger refresh in all data hooks by incrementing the trigger
       setRefreshTrigger(prev => prev + 1)
-      
+
       // Small delay to show the refresh state
       await new Promise(resolve => setTimeout(resolve, 500))
     } catch (error) {
