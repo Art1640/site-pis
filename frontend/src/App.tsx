@@ -9,6 +9,7 @@ import AllRecordsPage from './pages/AllRecordsPage'
 import PhotoGalleryPage from './pages/PhotoGalleryPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { RefreshProvider } from './contexts/RefreshContext'
+import { AdminProvider } from './contexts/AdminContext'
 import LoginScreen from './components/LoginScreen'
 
 // Protected App Component
@@ -60,7 +61,9 @@ const ProtectedApp: React.FC = () => {
 function App() {
   return (
     <AuthProvider>
-      <ProtectedApp />
+      <AdminProvider>
+        <ProtectedApp />
+      </AdminProvider>
     </AuthProvider>
   )
 }

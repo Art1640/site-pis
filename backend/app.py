@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import json
 import os
+import secrets
+import hashlib
 from datetime import datetime
 
 # Load environment variables
@@ -53,6 +55,7 @@ class FundraisingRecord(db.Model):
             montant_parsed = float(self.montant) if self.montant else 0
 
         return {
+            'id': self.id,
             'Date': self.date,
             'Qui': self.qui,
             'Type': self.type,
@@ -156,6 +159,27 @@ def delete_record():
         db.session.rollback()
         print(f"Error deleting record: {e}")
         return jsonify({'error': 'Failed to delete record'}), 500
+
+@app.route('/api/admin/login', methods=['POST'])
+def admin_login():
+    """Admin login endpoint - verifies password and returns token"""
+    try:
+        data = request.get_json()
+        password = data.get('password', '')
+
+        # Get admin password from environment variable
+        admin_password = os.getenv('ADMIN_PASSWORD')
+
+        # Hash the provided password and compare with stored hash
+        if password == admin_password:
+            # Generate a secure random token
+            token = secrets.token_urlsafe(32)
+            return jsonify({'token': token}), 200
+        else:
+            return jsonify({'error': 'Invalid password'}), 401
+    except Exception as e:
+        print(f"Error in admin login: {e}")
+        return jsonify({'error': 'Login failed'}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

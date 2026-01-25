@@ -4,14 +4,18 @@ import { formatCurrency, formatDate } from '../utils/formatters'
 import { getTotalAmount, getAmountTooltip, isArrayAmount, getTruncatedText } from '../utils/amountUtils'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
+import AddActivityModal from '../components/AddActivityModal'
 import { FundraisingRecord } from '../types'
 import { useRefresh } from '../contexts/RefreshContext'
+import { useAdmin } from '../contexts/AdminContext'
+import { apiService } from '../services/api'
 
 type SortField = keyof FundraisingRecord
 type SortDirection = 'asc' | 'desc'
 
 const AllRecordsPage: React.FC = () => {
-  const { refreshTrigger } = useRefresh()
+  const { refreshTrigger, refreshData } = useRefresh()
+  const { isAdmin } = useAdmin()
   const { records, loading, error } = useRecords(refreshTrigger)
   const [sortField, setSortField] = useState<SortField>('Date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
@@ -19,6 +23,8 @@ const AllRecordsPage: React.FC = () => {
   const [filterType, setFilterType] = useState<string>('')
   const [showQuiDropdown, setShowQuiDropdown] = useState(false)
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingRecord, setEditingRecord] = useState<FundraisingRecord | null>(null)
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -26,6 +32,41 @@ const AllRecordsPage: React.FC = () => {
     } else {
       setSortField(field)
       setSortDirection('asc')
+    }
+  }
+
+  const handleAddRecord = async (record: Omit<FundraisingRecord, 'id'>) => {
+    if (editingRecord) {
+      // Update existing record - preserve the ID
+      const updatedRecord = { ...record, id: editingRecord.id } as FundraisingRecord
+      await apiService.updateRecord(updatedRecord)
+    } else {
+      // Add new record
+      await apiService.addRecord(record)
+    }
+    await refreshData() // Refresh the data after adding/updating
+    setEditingRecord(null)
+  }
+
+  const handleEditRecord = (record: FundraisingRecord) => {
+    setEditingRecord(record)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setEditingRecord(null)
+  }
+
+  const handleDeleteRecord = async (record: FundraisingRecord) => {
+    if (window.confirm('T sur fréro ?')) {
+      try {
+        await apiService.deleteRecord(record)
+        await refreshData() // Refresh the data after deleting
+      } catch (error) {
+        console.error('Error deleting record:', error)
+        alert('Raté')
+      }
     }
   }
 
@@ -55,6 +96,11 @@ const AllRecordsPage: React.FC = () => {
     return filtered.sort((a, b) => {
       let aValue = a[sortField]
       let bValue = b[sortField]
+
+      // Handle undefined values
+      if (aValue === undefined && bValue === undefined) return 0
+      if (aValue === undefined) return 1
+      if (bValue === undefined) return -1
 
       if (sortField === 'Date') {
         aValue = new Date(aValue as string).getTime()
@@ -155,9 +201,31 @@ const AllRecordsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-scouts-blue mb-4">
-          Liste des activités
-        </h1>
+        <div className="flex items-center justify-center gap-3">
+          <h1 className="text-4xl font-bold text-scouts-blue mb-4">
+            Liste des activités
+          </h1>
+          {isAdmin && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="mb-4 group relative"
+            >
+              <svg
+                className="w-8 h-8 text-scouts-blue hover:text-scouts-blue-dark transition-colors cursor-pointer"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[700px] overflow-hidden">
@@ -288,25 +356,32 @@ const AllRecordsPage: React.FC = () => {
                 </th>
 
                 {/* Activité - Not sortable */}
-                <th className="w-32 md:w-44 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
+                <th className="w-28 md:w-36 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
                   Activité
                 </th>
 
                 {/* Détails - Not sortable */}
-                <th className="w-48 md:w-96 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
+                <th className="w-32 md:w-48 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider">
                   Détails
                 </th>
 
                 {/* Montant - Sortable */}
                 <th
                   onClick={() => handleSort('Montant')}
-                  className="w-24 md:w-36 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider cursor-pointer hover:bg-scouts-blue-dark transition-colors"
+                  className="w-24 md:w-32 px-3 md:px-6 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider cursor-pointer hover:bg-scouts-blue-dark transition-colors"
                 >
                   <div className="flex items-center space-x-1">
                     <span>Montant</span>
                     {getSortIcon('Montant')}
                   </div>
                 </th>
+
+                {/* Actions */}
+                {isAdmin && (
+                  <th className="w-20 md:w-24 px-2 md:px-4 py-3 text-center text-xs md:text-sm font-medium uppercase tracking-wider">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -338,7 +413,7 @@ const AllRecordsPage: React.FC = () => {
                   </td>
 		                  <td className="px-3 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
 		                    {(() => {
-		                      const { truncated, needsTooltip, original } = getTruncatedText(record.Activité, 25)
+		                      const { truncated, needsTooltip, original } = getTruncatedText(record.Activité, 20)
 
 		                      if (needsTooltip) {
 		                        return (
@@ -350,13 +425,13 @@ const AllRecordsPage: React.FC = () => {
 		                          </div>
 		                        )
 		                      }
-		
+
 		                      return truncated
 		                    })()}
 		                  </td>
 		                  <td className="px-3 md:px-6 py-4 text-xs md:text-sm text-gray-900 max-w-xs">
 		                    {(() => {
-		                      const { truncated, needsTooltip, original } = getTruncatedText(record.Détails, 40)
+		                      const { truncated, needsTooltip, original } = getTruncatedText(record.Détails, 25)
 
 		                      if (needsTooltip) {
 		                        return (
@@ -388,6 +463,55 @@ const AllRecordsPage: React.FC = () => {
                       formatCurrency(record.Montant as number)
                     )}
                   </td>
+
+                  {/* Actions: Edit & Delete */}
+                  {isAdmin && (
+                    <td className="px-2 md:px-4 py-4 whitespace-nowrap text-xs md:text-sm">
+                      <div className="flex items-center justify-center gap-1 md:gap-2">
+                        {/* Edit Button */}
+                        <button
+                          onClick={() => handleEditRecord(record)}
+                          className="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                          title="Modifier cette activité"
+                        >
+                          <svg
+                            className="w-4 h-4 md:w-5 md:h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => handleDeleteRecord(record)}
+                          className="text-red-600 hover:text-red-800 transition-colors p-1"
+                          title="Supprimer cette activité"
+                        >
+                          <svg
+                            className="w-4 h-4 md:w-5 md:h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -400,6 +524,15 @@ const AllRecordsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Add/Edit Activity Modal */}
+      <AddActivityModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleAddRecord}
+        existingRecords={records || []}
+        editRecord={editingRecord}
+      />
     </div>
   )
 }

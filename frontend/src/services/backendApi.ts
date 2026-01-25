@@ -189,6 +189,28 @@ export const backendApiService = {
     }
   },
 
+  async updateRecord(record: FundraisingRecord): Promise<FundraisingRecord> {
+    try {
+      if (!record.id) {
+        throw new Error('Record ID is required for update')
+      }
+      const response = await fetch(`${API_BASE_URL}/api/records/${record.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(record),
+      })
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      return await response.json()
+    } catch (error) {
+      console.error('Error updating record:', error)
+      throw new Error('Erreur lors de la mise à jour de l\'enregistrement')
+    }
+  },
+
   async deleteRecord(record: FundraisingRecord): Promise<void> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/records/delete`, {

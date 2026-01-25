@@ -19,10 +19,14 @@ eggs/
 *.whl
 
 # Environment variables and secrets
-# .env
-# *.env
-# *.env.*
-# !.env.example
+# Local .env files should NOT be committed (contain local/dev settings)
+# Production values are injected by GitHub Actions and Render
+.env
+*.env
+*.env.*
+!.env.example
+frontend/.env
+backend/.env
 
 # IDE and editor files
 .idea/

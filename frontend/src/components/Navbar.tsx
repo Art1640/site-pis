@@ -2,12 +2,16 @@ import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useSounds } from '../utils/soundUtils'
 import { useRefresh } from '../contexts/RefreshContext'
+import { useAdmin } from '../contexts/AdminContext'
+import AdminLoginModal from './AdminLoginModal'
 
 const Navbar: React.FC = () => {
   const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showAdminModal, setShowAdminModal] = useState(false)
   const { playNavigation } = useSounds()
   const { refreshData, isRefreshing } = useRefresh()
+  const { isAdmin, login, logout } = useAdmin()
 
   const navItems = [
     { path: '/', label: 'Home' },
@@ -76,7 +80,6 @@ const Navbar: React.FC = () => {
                   ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
                   : 'text-white hover:bg-scouts-blue-dark hover:text-white'
               }`}
-              title="Actualiser les données"
             >
               {isRefreshing ? (
                 <div className="flex items-center space-x-1">
@@ -95,6 +98,27 @@ const Navbar: React.FC = () => {
                 </div>
               )}
             </button>
+
+            {/* Admin Button */}
+            {isAdmin ? (
+              <button
+                onClick={logout}
+                className="p-2 rounded-md text-white hover:bg-red-600 transition-colors"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAdminModal(true)}
+                className="p-2 rounded-md text-white hover:bg-scouts-blue-dark transition-colors"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -164,9 +188,41 @@ const Navbar: React.FC = () => {
                 </div>
               )}
             </button>
+
+            {/* Mobile Admin Button */}
+            {isAdmin ? (
+              <button
+                onClick={logout}
+                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-red-600 transition-colors text-left"
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </div>
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAdminModal(true)}
+                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-scouts-blue-dark transition-colors text-left"
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Admin Login Modal */}
+      <AdminLoginModal
+        isOpen={showAdminModal}
+        onClose={() => setShowAdminModal(false)}
+        onLogin={login}
+      />
     </nav>
   )
 }

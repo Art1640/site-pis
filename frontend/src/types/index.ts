@@ -1,4 +1,5 @@
 export interface FundraisingRecord {
+  id?: number  // Optional - only present when using backend API
   Date: string
   Qui: string
   Type: string
