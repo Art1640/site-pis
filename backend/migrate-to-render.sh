@@ -6,6 +6,17 @@ echo "🌼 Pissenlits Fundraising - Migrate to Render Database"
 echo "========================================================"
 echo ""
 
+# Load environment variables from .env file
+if [ -f ".env" ]; then
+    echo "🔧 Loading environment variables from .env..."
+    export $(grep -v '^#' .env | xargs)
+else
+    echo "⚠️  Warning: .env file not found!"
+    echo "    Please create a .env file with DATABASE_URL"
+    echo "    See .env.example for reference"
+    exit 1
+fi
+
 # Activate virtual environment
 if [ -d "venv" ]; then
     echo "🔧 Activating virtual environment..."
@@ -14,12 +25,17 @@ else
     echo "⚠️  Warning: venv not found, using system Python"
 fi
 
-# Render PostgreSQL connection URL (External)
-# Note: Use the EXTERNAL hostname, not the internal one
-export DATABASE_URL="postgresql://fundraising_6qql_user:GfV7AkHA9YDfhPUvSxaxBQ16xniJ6J2X@dpg-d5qht56r433s7383q740-a.oregon-postgres.render.com/fundraising_6qql"
+# Check if DATABASE_URL is set
+if [ -z "$DATABASE_URL" ]; then
+    echo "❌ Error: DATABASE_URL not set in .env file"
+    exit 1
+fi
+
+# Extract database host from URL for display (without credentials)
+DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^/]*\).*/\1/p')
 
 echo "🔗 Connecting to Render PostgreSQL database..."
-echo "📊 Database: dpg-d5qht56r433s7383q740-a.oregon-postgres.render.com"
+echo "📊 Database: $DB_HOST"
 echo ""
 
 # Run the migration script
