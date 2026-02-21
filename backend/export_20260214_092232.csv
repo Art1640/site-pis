@@ -1,0 +1,34 @@
+id,Date,Qui,Type,Activité,Détails,Montant
+1,2025-09-19,Groupe,Bar Pi,Bar Pi #1,"Tout le monde présent, grosse caisse, sympa :)",150.03
+2,2025-09-20,Ocicat,Vente,Cookies,Dans quartier,65
+3,2025-09-27,"Dorcopsis, Sika, Merione, Charlotte, Chousingha, Nathan",Caisses,Delhaize,Delhaize Fort Jaco,295.36
+4,2025-09-29,Dorcopsis,Pourboires,Resto,,40
+5,2025-10-05,"Nevala, Tanuki",Vente,Cookies & Brochettes de bonbons,Marché de Waterloo,161.5
+6,2025-10-09,Charlotte,Babysitting,,,10
+7,2025-10-09,Merione,Babysitting,,,27
+8,2025-10-12,"Chousingha, Charlotte, Adrien, Taguan, Merione",Action,Chaussettes,Vague 1,"[33, 21, 60, 48, 111]"
+9,2025-10-18,"Viktor, Taguan, Adrien",Caisses,Grande Epicerie,Grande Epicerie Fort Jaco,206.5
+10,2025-10-19,"Dorcopsis, Sika, Chousingha",Caisses,Delhaize,Delhaize Fort Jaco,303.78
+11,2025-10-24,Merione,Travail perso,Travail perso,Aide Tatie Crouton,100
+12,2025-10-31,"Nevala, Tanuki",Vente,Cookies,Dans quartier,113.8
+13,2025-11-01,"Taguan, Adrien, Chousingha, Merione, Dorcopsis",Action,Calendriers,,"[34, 28, 22, 15, 12]"
+14,2025-11-01,Groupe,Bar Pi,Bar Pi #2,"Bonne édition, vla du monde",242.14
+15,2025-11-03,Sika,Travail perso,Travail perso,Aide maman,85
+16,2025-11-08,"Merione, Tanuki",Caisses,Grande Epicerie,Grande Epicerie Fort Jaco,157.2
+17,2025-11-14,"Nevala, Dorcopsis, Sika, Adrien, Ocicat",Action,Chaussettes,Vagues 2 & 3,"[48, 45, 33, 12, 330]"
+18,2025-11-15,"Sika, Dorcopsis",Caisses,Delhaize,Delhaize Fort Jaco,137.2
+19,2025-11-16,"Chousingha, Nevala",Caisses,Delhaize,Delhaize Fort Jaco,"[80, 99.8]"
+20,2025-12-05,Sika,Travail perso,Travail perso,Aide maman,69.7
+21,2025-12-07,"Groupe, Taguan, Charlotte, Dorcopsis, Chousingha, Merione, Ocicat, Tanuki, Viktor",Action,Sapins,,"[1143, 30, 15, 15, 15, 75, 60, 45, 120]"
+22,2025-12-21,"Nevala, Merione",Vente,Cookies,Magasin vin,"[100, 102.5]"
+23,2025-12-21,"Tanuki, Chousingha, Taguan, Dorcopsis",Caisses,Carrefour,Carrefour Waterloo,"[35, 56.8, 56.8, 56.8]"
+24,2025-12-23,"Dorcopsis, Tanuki",Caisses,Carrefour,Carrefour Waterloo,"[63.4, 30]"
+25,2025-12-24,"Adrien, Taguan",Caisses,Carrefour,Carrefour Waterloo,163
+26,2025-12-27,"Merione, Tanuki",Caisses,Grande Epicerie,Grande Epicerie Fort Jaco,170
+27,2025-12-30,"Chousingha, Tanuki",Caisses,Grande Epicerie,Grande Epicerie Fort Jaco,"[175.2, 56.6]"
+28,2025-12-31,"Groupe, Dorcopsis, Tanuki, Viktor, Taguan",Action,Vin,,"[151.27, 13.06, 52.1, 8.51, 48.72]"
+32,2026-01-17,Ocicat,Action,Cookies,,60
+30,2026-01-25,Viktor,Travail perso,Travail perso,Papa polonais,100
+29,2026-01-31,Dorcopsis,Vente,Lasagnes,,42
+33,2026-02-07,"Chousingha, Tanuki, Ocicat",Caisses,Delhaize,,"[92.15, 113.6, 57.8]"
+34,2026-02-07,Groupe,Bar Pi,Bar PI #3,"What an edition, taxi a gogo",1

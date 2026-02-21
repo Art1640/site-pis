@@ -2,17 +2,19 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+from functools import wraps
 import json
 import os
 import secrets
-import hashlib
-from datetime import datetime
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+# In-memory token storage (for production, consider Redis or database)
+active_tokens = set()
 
 # Database Configuration
 # Use PostgreSQL in production (Render), SQLite for local development
@@ -83,7 +85,32 @@ class FundraisingRecord(db.Model):
             montant=montant_str
         )
 
+# Authentication decorator
+def require_auth(f):
+    """Decorator to require valid authentication token"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Get token from Authorization header
+        auth_header = request.headers.get('Authorization')
+
+        if not auth_header:
+            return jsonify({'error': 'No authorization token provided'}), 401
+
+        # Expected format: "Bearer <token>"
+        try:
+            token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
+        except IndexError:
+            return jsonify({'error': 'Invalid authorization header format'}), 401
+
+        # Validate token
+        if token not in active_tokens:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/api/records', methods=['GET'])
+@require_auth
 def get_records():
     """Get all fundraising records"""
     try:
@@ -94,6 +121,7 @@ def get_records():
         return jsonify({'error': 'Failed to retrieve records'}), 500
 
 @app.route('/api/records', methods=['POST'])
+@require_auth
 def add_record():
     """Add a new fundraising record"""
     try:
@@ -108,6 +136,7 @@ def add_record():
         return jsonify({'error': 'Failed to add record'}), 500
 
 @app.route('/api/records/<int:record_id>', methods=['PUT'])
+@require_auth
 def update_record(record_id):
     """Update an existing fundraising record"""
     try:
@@ -134,6 +163,7 @@ def update_record(record_id):
         return jsonify({'error': 'Failed to update record'}), 500
 
 @app.route('/api/records/delete', methods=['POST'])
+@require_auth
 def delete_record():
     """Delete a fundraising record by matching Date, Qui, and Activité"""
     try:
@@ -160,6 +190,43 @@ def delete_record():
         print(f"Error deleting record: {e}")
         return jsonify({'error': 'Failed to delete record'}), 500
 
+@app.route('/api/login', methods=['POST'])
+def login():
+    """Login endpoint - verifies VIEW_PASSWORD and returns token"""
+    try:
+        data = request.get_json()
+        password = data.get('password', '')
+
+        # Get view password from environment variable
+        view_password = os.getenv('VIEW_PASSWORD')
+
+        if password == view_password:
+            # Generate a secure random token
+            token = secrets.token_urlsafe(32)
+            # Store token in active tokens
+            active_tokens.add(token)
+            return jsonify({'token': token}), 200
+        else:
+            return jsonify({'error': 'Invalid password'}), 401
+    except Exception as e:
+        print(f"Error in login: {e}")
+        return jsonify({'error': 'Login failed'}), 500
+
+@app.route('/api/logout', methods=['POST'])
+@require_auth
+def logout():
+    """Logout endpoint - invalidates the token"""
+    try:
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
+
+        # Remove token from active tokens
+        active_tokens.discard(token)
+        return jsonify({'message': 'Logged out successfully'}), 200
+    except Exception as e:
+        print(f"Error in logout: {e}")
+        return jsonify({'error': 'Logout failed'}), 500
+
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login():
     """Admin login endpoint - verifies password and returns token"""
@@ -174,6 +241,8 @@ def admin_login():
         if password == admin_password:
             # Generate a secure random token
             token = secrets.token_urlsafe(32)
+            # Store token in active tokens (admin tokens also grant access)
+            active_tokens.add(token)
             return jsonify({'token': token}), 200
         else:
             return jsonify({'error': 'Invalid password'}), 401

@@ -5,17 +5,21 @@ const LoginScreen: React.FC = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isShaking, setIsShaking] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const { login } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    const success = login(password)
+    setIsLoading(true)
+
+    const success = await login(password)
+    setIsLoading(false)
+
     if (!success) {
       setError('Code incorrect')
       setPassword('')
       setIsShaking(true)
-      
+
       // Remove shake animation after it completes
       setTimeout(() => setIsShaking(false), 500)
     }
@@ -56,9 +60,10 @@ const LoginScreen: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full bg-scouts-blue hover:bg-scouts-blue-dark text-white font-medium py-3 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-scouts-blue focus:ring-offset-2 outline-none"
+            disabled={isLoading}
+            className="w-full bg-scouts-blue hover:bg-scouts-blue-dark text-white font-medium py-3 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-scouts-blue focus:ring-offset-2 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Entrer
+            {isLoading ? 'Connexion...' : 'Entrer'}
           </button>
         </form>
       </div>

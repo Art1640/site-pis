@@ -5,6 +5,25 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 console.log('🔗 API Base URL:', API_BASE_URL)
 
+// Helper function to get auth token from localStorage
+const getAuthToken = (): string | null => {
+  return localStorage.getItem('pissenlits_auth_token')
+}
+
+// Helper function to create headers with auth token
+const getAuthHeaders = (): HeadersInit => {
+  const token = getAuthToken()
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  }
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  return headers
+}
+
 // Helper type for individual records (always have number Montant)
 type IndividualRecord = Omit<FundraisingRecord, 'Montant'> & { Montant: number }
 
@@ -137,15 +156,20 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
 export const backendApiService = {
   async getRecords(): Promise<FundraisingRecord[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/records`)
+      const response = await fetch(`${API_BASE_URL}/api/records`, {
+        headers: getAuthHeaders(),
+      })
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Session expirée, veuillez vous reconnecter')
+        }
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       const data = await response.json()
       return data
     } catch (error) {
       console.error('Error fetching records:', error)
-      throw new Error('Impossible de charger les données, veuillez réessayer')
+      throw error instanceof Error ? error : new Error('Impossible de charger les données, veuillez réessayer')
     }
   },
 
@@ -173,19 +197,20 @@ export const backendApiService = {
     try {
       const response = await fetch(`${API_BASE_URL}/api/records`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(record),
       })
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Session expirée, veuillez vous reconnecter')
+        }
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       const data = await response.json()
       return data
     } catch (error) {
       console.error('Error adding record:', error)
-      throw new Error('Erreur lors de l\'ajout de l\'enregistrement')
+      throw error instanceof Error ? error : new Error('Erreur lors de l\'ajout de l\'enregistrement')
     }
   },
 
@@ -196,18 +221,19 @@ export const backendApiService = {
       }
       const response = await fetch(`${API_BASE_URL}/api/records/${record.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(record),
       })
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Session expirée, veuillez vous reconnecter')
+        }
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       return await response.json()
     } catch (error) {
       console.error('Error updating record:', error)
-      throw new Error('Erreur lors de la mise à jour de l\'enregistrement')
+      throw error instanceof Error ? error : new Error('Erreur lors de la mise à jour de l\'enregistrement')
     }
   },
 
@@ -215,9 +241,7 @@ export const backendApiService = {
     try {
       const response = await fetch(`${API_BASE_URL}/api/records/delete`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           Date: record.Date,
           Qui: record.Qui,
@@ -225,11 +249,14 @@ export const backendApiService = {
         }),
       })
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Session expirée, veuillez vous reconnecter')
+        }
         throw new Error(`HTTP error! status: ${response.status}`)
       }
     } catch (error) {
       console.error('Error deleting record:', error)
-      throw new Error('Erreur lors de la suppression de l\'enregistrement')
+      throw error instanceof Error ? error : new Error('Erreur lors de la suppression de l\'enregistrement')
     }
   },
 
