@@ -25,6 +25,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [])
 
+  // Listen for 401 responses from the API and auto-logout
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setIsAuthenticated(false)
+      localStorage.removeItem(AUTH_TOKEN_KEY)
+    }
+    window.addEventListener('auth:unauthorized', handleUnauthorized)
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized)
+  }, [])
+
   const login = async (password: string): Promise<boolean> => {
     try {
       // Call backend to verify password

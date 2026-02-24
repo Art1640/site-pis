@@ -10,6 +10,11 @@ const getAuthToken = (): string | null => {
   return localStorage.getItem('pissenlits_auth_token')
 }
 
+// Dispatch a custom event so AuthContext can react and log the user out
+const handleUnauthorized = (): void => {
+  window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+}
+
 // Helper function to create headers with auth token
 const getAuthHeaders = (): HeadersInit => {
   const token = getAuthToken()
@@ -161,6 +166,7 @@ export const backendApiService = {
       })
       if (!response.ok) {
         if (response.status === 401) {
+          handleUnauthorized()
           throw new Error('Session expirée, veuillez vous reconnecter')
         }
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -202,6 +208,7 @@ export const backendApiService = {
       })
       if (!response.ok) {
         if (response.status === 401) {
+          handleUnauthorized()
           throw new Error('Session expirée, veuillez vous reconnecter')
         }
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -226,6 +233,7 @@ export const backendApiService = {
       })
       if (!response.ok) {
         if (response.status === 401) {
+          handleUnauthorized()
           throw new Error('Session expirée, veuillez vous reconnecter')
         }
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -250,6 +258,7 @@ export const backendApiService = {
       })
       if (!response.ok) {
         if (response.status === 401) {
+          handleUnauthorized()
           throw new Error('Session expirée, veuillez vous reconnecter')
         }
         throw new Error(`HTTP error! status: ${response.status}`)
