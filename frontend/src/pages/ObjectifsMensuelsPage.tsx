@@ -1,14 +1,17 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useRecords, useIndividualRecords } from '../hooks/useData'
 import { formatCurrency } from '../utils/formatters'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorMessage from '../components/ErrorMessage'
 import { useRefresh } from '../contexts/RefreshContext'
 
+const TARGET_PER_MONTH = 120
+
 const ObjectifsMensuelsPage: React.FC = () => {
   const { refreshTrigger } = useRefresh()
   const { records, loading: recordsLoading, error: recordsError } = useRecords(refreshTrigger)
   const { records: individualRecords, loading: individualLoading, error: individualError } = useIndividualRecords(refreshTrigger)
+  const [showGlobalView, setShowGlobalView] = useState(false)
 
   const loading = recordsLoading || individualLoading
   const error = recordsError || individualError
@@ -84,6 +87,36 @@ const ObjectifsMensuelsPage: React.FC = () => {
     return amounts
   }, [individualRecords, individualNames, months])
 
+  // Cumulative monthly targets: 120, 240, ..., 1200
+  const monthlyTargets = useMemo(() => {
+    const targets = new Map<string, number>()
+    months.forEach((month, index) => {
+      targets.set(month.key, TARGET_PER_MONTH * (index + 1))
+    })
+    return targets
+  }, [months])
+
+  // Calculate cumulative amounts per person per month
+  const cumulativeAmounts = useMemo(() => {
+    const cumulative = new Map<string, Map<string, number>>()
+    individualNames.forEach(person => {
+      const personCumulative = new Map<string, number>()
+      let runningTotal = 0
+      months.forEach(month => {
+        runningTotal += monthlyAmounts.get(person)?.get(month.key) || 0
+        personCumulative.set(month.key, runningTotal)
+      })
+      cumulative.set(person, personCumulative)
+    })
+    return cumulative
+  }, [monthlyAmounts, individualNames, months])
+
+  // Current month key (reused in JSX)
+  const currentMonthKey = useMemo(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  }, [])
+
   // Function to get the best and worst performers for each month
   const getMonthlyRankings = useMemo(() => {
     const currentDate = new Date()
@@ -127,14 +160,14 @@ const ObjectifsMensuelsPage: React.FC = () => {
     return rankings
   }, [monthlyAmounts, individualNames, months])
 
-  // Function to get color based on amount vs 100€ objective
+  // Function to get color based on amount vs 120€ objective
   const getAmountColor = (amount: number, isFutureMonth: boolean) => {
     if (isFutureMonth) return ''
 
-    if (amount >= 100) return 'bg-green-100 text-green-800 border border-green-200'
-    if (amount >= 75) return 'bg-lime-100 text-lime-800 border border-lime-200'
-    if (amount >= 50) return 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-    if (amount >= 25) return 'bg-orange-100 text-orange-800 border border-orange-200'
+    if (amount >= 120) return 'bg-green-100 text-green-800 border border-green-200'
+    if (amount >= 90) return 'bg-lime-100 text-lime-800 border border-lime-200'
+    if (amount >= 60) return 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+    if (amount >= 30) return 'bg-orange-100 text-orange-800 border border-orange-200'
     return 'bg-red-100 text-red-800 border border-red-200' // This includes 0€
   }
 
@@ -150,13 +183,40 @@ const ObjectifsMensuelsPage: React.FC = () => {
     <div className="max-w-7xl mx-auto">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-scouts-blue mb-4">
-          100€ par mois, remember ? (et par personne)
+          Objectif 1200€ avant juillet
         </h1>
       </div>
 
       <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 flex flex-col h-[700px] overflow-hidden">
+        {/* Toggle buttons */}
+        <div className="flex items-center justify-between mb-4 flex-shrink-0">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setShowGlobalView(false)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                !showGlobalView
+                  ? 'bg-scouts-blue text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              📅 Par mois
+            </button>
+            <button
+              onClick={() => setShowGlobalView(true)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                showGlobalView
+                  ? 'bg-scouts-blue text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              📊 Global
+            </button>
+          </div>
+        </div>
+
         {/* Scrollable Table Container */}
-        <div className="flex-1 overflow-y-auto overflow-x-auto" style={{ scrollBehavior: 'smooth', maxHeight: '620px' }}>
+        <div className="flex-1 overflow-y-auto overflow-x-auto" style={{ scrollBehavior: 'smooth' }}>
+          {!showGlobalView ? (
           <table className="w-full table-fixed border-collapse" style={{ minWidth: `${100 + months.length * 80}px` }}>
             <thead className="sticky top-0 bg-white z-10">
               <tr className="bg-scouts-blue text-white">
@@ -164,10 +224,7 @@ const ObjectifsMensuelsPage: React.FC = () => {
                   Personne
                 </th>
                 {months.map(month => {
-                  const currentDate = new Date()
-                  const currentMonthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`
                   const isFutureMonth = month.key > currentMonthKey
-
                   return (
                     <th key={month.label} className={`w-20 md:w-32 px-2 md:px-6 py-3 text-center text-xs md:text-sm font-medium uppercase tracking-wider border-r border-scouts-blue-dark ${isFutureMonth ? 'bg-scouts-blue/70 text-white/70' : ''}`}>
                       {month.label}
@@ -196,10 +253,6 @@ const ObjectifsMensuelsPage: React.FC = () => {
 	                    </td>
 	                    {months.map(month => {
 	                      const amount = monthlyAmounts.get(name)?.get(month.key) || 0
-	                      const currentDate = new Date()
-	                      const currentMonthKey = `${currentDate.getFullYear()}-${String(
-	                        currentDate.getMonth() + 1
-	                      ).padStart(2, '0')}`
 	                      const isFutureMonth = month.key > currentMonthKey
 	                      const colorClasses = getAmountColor(amount, isFutureMonth)
 
@@ -240,6 +293,78 @@ const ObjectifsMensuelsPage: React.FC = () => {
 	              })}
 	            </tbody>
           </table>
+          ) : (
+          /* ── GLOBAL VIEW ── */
+          <table className="w-full table-fixed border-collapse" style={{ minWidth: `${100 + months.length * 80}px` }}>
+            <thead className="sticky top-0 bg-white z-10">
+              <tr className="bg-scouts-blue text-white">
+                <th className="w-20 md:w-32 px-2 md:px-4 py-3 text-left text-xs md:text-sm font-medium uppercase tracking-wider border-r border-scouts-blue-dark">
+                  Personne
+                </th>
+                {months.map(month => {
+                  const isFutureMonth = month.key > currentMonthKey
+                  return (
+                    <th key={month.label} className={`w-20 md:w-32 px-2 md:px-6 py-3 text-center text-xs md:text-sm font-medium uppercase tracking-wider border-r border-scouts-blue-dark ${isFutureMonth ? 'bg-scouts-blue/70 text-white/70' : ''}`}>
+                      {month.label}
+                    </th>
+                  )
+                })}
+              </tr>
+              {/* Cumulative target row */}
+              <tr className="bg-amber-50 border-b-2 border-amber-300">
+                <td className="px-2 md:px-4 py-3 whitespace-nowrap text-xs md:text-sm font-bold text-amber-800 border-r border-amber-200">
+                  🎯 Objectif
+                </td>
+                {months.map(month => {
+                  const isFutureMonth = month.key > currentMonthKey
+                  const target = monthlyTargets.get(month.key) || 0
+                  return (
+                    <td key={month.key} className={`px-2 md:px-6 py-3 text-xs md:text-sm text-center font-bold border-r border-amber-200 ${isFutureMonth ? 'text-amber-300' : 'text-amber-800'}`}>
+                      {formatCurrency(target)}
+                    </td>
+                  )
+                })}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {orderedIndividualNames.map(name => {
+                const isRetired = name === 'Charlotte' || name === 'Nathan'
+                const personCurrentCumulative = cumulativeAmounts.get(name)?.get(currentMonthKey) || 0
+                const currentTarget = monthlyTargets.get(currentMonthKey) || 0
+                const isOnTrack = !isRetired && personCurrentCumulative >= currentTarget
+                const rowBg = isRetired ? 'bg-gray-50 opacity-60' : isOnTrack ? 'bg-green-50' : 'bg-red-50'
+                return (
+                  <tr key={name} className={rowBg}>
+                    <td className={`px-2 md:px-4 py-4 whitespace-nowrap text-xs md:text-sm font-medium border-r border-gray-200 ${isRetired ? 'text-gray-400 italic' : isOnTrack ? 'text-green-900' : 'text-red-900'}`}>
+                      {name} {isRetired ? '💀' : isOnTrack ? '✅' : '❌'}
+                    </td>
+                    {months.map(month => {
+                      const isFutureMonth = month.key > currentMonthKey
+                      const cumulative = cumulativeAmounts.get(name)?.get(month.key) || 0
+                      const target = monthlyTargets.get(month.key) || 0
+                      const isAbove = cumulative >= target
+                      return (
+                        <td key={month.key} className={`px-2 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-center border-r border-gray-200 ${isFutureMonth ? 'text-gray-400' : 'text-gray-900'}`}>
+                          {isFutureMonth ? '-' : (
+                            <span className={`px-2 py-1 rounded-md font-medium ${
+                              isRetired
+                                ? 'bg-gray-100 text-gray-600 border border-gray-200'
+                                : isAbove
+                                  ? 'bg-green-100 text-green-800 border border-green-200'
+                                  : 'bg-red-100 text-red-800 border border-red-200'
+                            }`}>
+                              {formatCurrency(cumulative)}
+                            </span>
+                          )}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+          )}
 
           {individualNames.length === 0 && (
             <div className="text-center py-8 text-gray-500">

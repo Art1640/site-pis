@@ -396,10 +396,10 @@ const HomePage: React.FC = () => {
           💵💲 Collecte de la Moulah 💲💵
         </h1>
         <h2 className="text-xl text-gray-600 mb-6">
-          Pour financer nos vacances de juillet 2026 🥥🌴
+          Pour financer notre voyage de juillet 2026 🥥🌴
         </h2>
         <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-          Direction Afrique, ou Asie, on verra...
+          Direction Thaïlande & Laos afouuu
         </p>
       </div>
 
