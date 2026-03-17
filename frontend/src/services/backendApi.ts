@@ -113,22 +113,26 @@ const calculateSummary = (records: FundraisingRecord[]): SummaryData => {
     person_totals[record.Qui] = (person_totals[record.Qui] || 0) + record.Montant
   })
 
-  // Group by activity type
+  // Group by activity (use original records to count 1 per activity, not 1 per participant)
   const activity_totals: { [key: string]: number } = {}
   const activity_counts: { [key: string]: number } = {}
-  individualRecords.forEach(record => {
-    const activity = record.Activité
-    activity_totals[activity] = (activity_totals[activity] || 0) + record.Montant
-    activity_counts[activity] = (activity_counts[activity] || 0) + 1
+  records.forEach(record => {
+    const amount = Array.isArray(record.Montant)
+      ? record.Montant.reduce((a, b) => a + b, 0)
+      : record.Montant
+    activity_totals[record.Activité] = (activity_totals[record.Activité] || 0) + amount
+    activity_counts[record.Activité] = (activity_counts[record.Activité] || 0) + 1
   })
 
-  // Group by type
+  // Group by type (use original records to count 1 per activity, not 1 per participant)
   const type_totals: { [key: string]: number } = {}
   const type_counts: { [key: string]: number } = {}
-  individualRecords.forEach(record => {
-    const type = record.Type
-    type_totals[type] = (type_totals[type] || 0) + record.Montant
-    type_counts[type] = (type_counts[type] || 0) + 1
+  records.forEach(record => {
+    const amount = Array.isArray(record.Montant)
+      ? record.Montant.reduce((a, b) => a + b, 0)
+      : record.Montant
+    type_totals[record.Type] = (type_totals[record.Type] || 0) + amount
+    type_counts[record.Type] = (type_counts[record.Type] || 0) + 1
   })
 
   // Calculate cumulative data by date

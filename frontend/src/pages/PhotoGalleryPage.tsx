@@ -103,11 +103,11 @@ const PhotoGalleryPage: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Main Photo Display */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
-          <div className="relative">
+          <div className="relative flex items-center justify-center bg-black min-h-48">
             <img
               src={photos[currentIndex]}
               alt={`Photo ${currentIndex + 1}`}
-              className="w-full h-96 md:h-[500px] object-cover"
+              className="max-h-[75vh] max-w-full w-auto object-contain"
               onError={(e) => {
                 const target = e.target as HTMLImageElement
                 console.error('❌ Failed to load image:', target.src)
@@ -155,7 +155,6 @@ const PhotoGalleryPage: React.FC = () => {
         {/* Thumbnail Navigation */}
         {photos.length > 1 && (
           <div className="bg-white rounded-lg shadow-lg p-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Toutes les photos</h3>
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
               {photos.map((photo, index) => (
                 <button

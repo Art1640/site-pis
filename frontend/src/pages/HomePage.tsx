@@ -235,7 +235,39 @@ const HomePage: React.FC = () => {
 
           return dataIndex === lastValidIndex
         },
-        align: 'right' as const,
+        align: function(context: any) {
+          // Fan labels that share similar pixel Y positions so they don't overlap.
+          // 0° = right, 90° = up, -90° = down (chartjs-plugin-datalabels convention).
+          const yScale = context.chart.scales?.y
+          if (!yScale) return 0
+
+          // Collect the final-value pixel Y for every visible dataset
+          const finalPixels: Array<{ dsIndex: number; pixelY: number; value: number }> = []
+          context.chart.data.datasets.forEach((ds: any, i: number) => {
+            for (let j = ds.data.length - 1; j >= 0; j--) {
+              if (ds.data[j] !== null && ds.data[j] !== undefined) {
+                finalPixels.push({ dsIndex: i, value: ds.data[j], pixelY: yScale.getPixelForValue(ds.data[j]) })
+                break
+              }
+            }
+          })
+
+          const mine = finalPixels.find(fp => fp.dsIndex === context.datasetIndex)
+          if (!mine) return 0
+
+          // Cluster: any label whose pixel Y is within 18px of ours
+          const THRESHOLD_PX = 18
+          const cluster = finalPixels
+            .filter(fp => Math.abs(fp.pixelY - mine.pixelY) <= THRESHOLD_PX)
+            .sort((a, b) => b.value - a.value) // highest value first → pushed up
+
+          if (cluster.length <= 1) return 0 // no overlap – straight right
+
+          const pos = cluster.findIndex(fp => fp.dsIndex === context.datasetIndex)
+          const spread = Math.min(55, cluster.length * 18) // total angular spread in degrees
+          const step = spread / (cluster.length - 1)
+          return (-spread / 2 + pos * step) as any // negative = down, positive = up
+        },
         anchor: 'center' as const,
         offset: 15,
         backgroundColor: 'transparent',
