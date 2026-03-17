@@ -6,6 +6,8 @@ from functools import wraps
 import json
 import os
 import secrets
+import cloudinary
+import cloudinary.uploader
 
 # Load environment variables
 load_dotenv()
@@ -15,6 +17,15 @@ CORS(app)  # Enable CORS for all routes
 
 # In-memory token storage (for production, consider Redis or database)
 active_tokens = set()
+admin_tokens = set()  # subset of active_tokens that have admin privileges
+
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET'),
+    secure=True
+)
 
 # Database Configuration
 # Use PostgreSQL in production (Render), SQLite for local development
@@ -85,6 +96,25 @@ class FundraisingRecord(db.Model):
             montant=montant_str
         )
 
+# Photo model
+class Photo(db.Model):
+    __tablename__ = 'photos'
+
+    id = db.Column(db.Integer, primary_key=True)
+    url = db.Column(db.String(500), nullable=False)        # Cloudinary secure URL
+    public_id = db.Column(db.String(200), nullable=False)  # Cloudinary public_id (needed for deletion)
+    caption = db.Column(db.String(200), default='')
+    uploaded_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'url': self.url,
+            'public_id': self.public_id,
+            'caption': self.caption,
+            'uploaded_at': self.uploaded_at.isoformat() if self.uploaded_at else None,
+        }
+
 # Authentication decorator
 def require_auth(f):
     """Decorator to require valid authentication token"""
@@ -106,6 +136,22 @@ def require_auth(f):
         if token not in active_tokens:
             return jsonify({'error': 'Invalid or expired token'}), 401
 
+        return f(*args, **kwargs)
+    return decorated_function
+
+def require_admin(f):
+    """Decorator to require admin token"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({'error': 'No authorization token provided'}), 401
+        try:
+            token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
+        except IndexError:
+            return jsonify({'error': 'Invalid authorization header format'}), 401
+        if token not in admin_tokens:
+            return jsonify({'error': 'Admin access required'}), 403
         return f(*args, **kwargs)
     return decorated_function
 
@@ -220,8 +266,9 @@ def logout():
         auth_header = request.headers.get('Authorization')
         token = auth_header.split(' ')[1] if ' ' in auth_header else auth_header
 
-        # Remove token from active tokens
+        # Remove token from active tokens (and admin tokens if applicable)
         active_tokens.discard(token)
+        admin_tokens.discard(token)
         return jsonify({'message': 'Logged out successfully'}), 200
     except Exception as e:
         print(f"Error in logout: {e}")
@@ -241,14 +288,83 @@ def admin_login():
         if password == admin_password:
             # Generate a secure random token
             token = secrets.token_urlsafe(32)
-            # Store token in active tokens (admin tokens also grant access)
+            # Store token in both active and admin token sets
             active_tokens.add(token)
+            admin_tokens.add(token)
             return jsonify({'token': token}), 200
         else:
             return jsonify({'error': 'Invalid password'}), 401
     except Exception as e:
         print(f"Error in admin login: {e}")
         return jsonify({'error': 'Login failed'}), 500
+
+@app.route('/api/photos', methods=['GET'])
+def get_photos():
+    """Get all photos — public endpoint"""
+    try:
+        photos = Photo.query.order_by(Photo.uploaded_at.desc()).all()
+        return jsonify([p.to_dict() for p in photos])
+    except Exception as e:
+        print(f"Error retrieving photos: {e}")
+        return jsonify({'error': 'Failed to retrieve photos'}), 500
+
+@app.route('/api/photos', methods=['POST'])
+@require_admin
+def upload_photo():
+    """Upload a photo to Cloudinary and save metadata — admin only"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+
+        file = request.files['file']
+        caption = request.form.get('caption', '')
+
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+
+        # Upload to Cloudinary (folder keeps things organised)
+        result = cloudinary.uploader.upload(
+            file,
+            folder='pissenlits',
+            resource_type='image'
+        )
+
+        # Persist metadata in DB
+        photo = Photo(
+            url=result['secure_url'],
+            public_id=result['public_id'],
+            caption=caption
+        )
+        db.session.add(photo)
+        db.session.commit()
+
+        print(f"✅ Photo uploaded: {result['public_id']}")
+        return jsonify(photo.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error uploading photo: {e}")
+        return jsonify({'error': 'Failed to upload photo'}), 500
+
+@app.route('/api/photos/<int:photo_id>', methods=['DELETE'])
+@require_admin
+def delete_photo(photo_id):
+    """Delete a photo from Cloudinary and the DB — admin only"""
+    try:
+        photo = Photo.query.get_or_404(photo_id)
+
+        # Remove from Cloudinary
+        cloudinary.uploader.destroy(photo.public_id)
+
+        # Remove from DB
+        db.session.delete(photo)
+        db.session.commit()
+
+        print(f"✅ Photo deleted: {photo.public_id}")
+        return jsonify({'message': 'Photo deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting photo: {e}")
+        return jsonify({'error': 'Failed to delete photo'}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

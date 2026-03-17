@@ -1,5 +1,13 @@
 import { FundraisingRecord, SummaryData } from '../types'
 
+export interface PhotoRecord {
+  id: number
+  url: string
+  public_id: string
+  caption: string
+  uploaded_at: string | null
+}
+
 // Get API URL from environment variable or use default for development
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
@@ -8,6 +16,11 @@ console.log('🔗 API Base URL:', API_BASE_URL)
 // Helper function to get auth token from localStorage
 const getAuthToken = (): string | null => {
   return localStorage.getItem('pissenlits_auth_token')
+}
+
+// Helper function to get admin token from sessionStorage
+const getAdminToken = (): string | null => {
+  return sessionStorage.getItem('admin_token')
 }
 
 // Dispatch a custom event so AuthContext can react and log the user out
@@ -292,6 +305,53 @@ export const backendApiService = {
     // Not implemented for backend - data is always fresh from server
     // This is a no-op in backend mode
     console.log('clearAllData() is not needed in backend mode - data is always fresh')
-  }
+  },
+
+  // ── Photo endpoints ────────────────────────────────────────────────────────
+
+  async getPhotos(): Promise<PhotoRecord[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/photos`)
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+      return await response.json()
+    } catch (error) {
+      console.error('Error fetching photos:', error)
+      throw error instanceof Error ? error : new Error('Impossible de charger les photos')
+    }
+  },
+
+  async uploadPhoto(file: File, caption: string): Promise<PhotoRecord> {
+    const adminToken = getAdminToken()
+    if (!adminToken) throw new Error('Admin authentication required')
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('caption', caption)
+
+    const response = await fetch(`${API_BASE_URL}/api/photos`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${adminToken}` },
+      body: formData,
+    })
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.error || `Upload failed: ${response.status}`)
+    }
+    return await response.json()
+  },
+
+  async deletePhoto(photoId: number): Promise<void> {
+    const adminToken = getAdminToken()
+    if (!adminToken) throw new Error('Admin authentication required')
+
+    const response = await fetch(`${API_BASE_URL}/api/photos/${photoId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${adminToken}` },
+    })
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.error || `Delete failed: ${response.status}`)
+    }
+  },
 }
 
